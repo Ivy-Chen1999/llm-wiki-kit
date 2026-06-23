@@ -16,7 +16,7 @@ You are computing the current state of the wiki: what's been ingested, what's ne
 
 ## Before You Start
 
-1. Read `.env` to get `OBSIDIAN_VAULT_PATH`, `OBSIDIAN_SOURCES_DIR`, `CLAUDE_HISTORY_PATH`, `CODEX_HISTORY_PATH`
+1. Read `~/.obsidian-wiki/config` (fall back to `.env` in this repo) to get `OBSIDIAN_VAULT_PATH`, `OBSIDIAN_SOURCES_DIR`, `CLAUDE_HISTORY_PATH`, `CODEX_HISTORY_PATH`
 2. Read `.manifest.json` at the vault root — this is the ingest tracking ledger
 
 ## The Manifest

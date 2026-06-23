@@ -15,7 +15,7 @@ You are ingesting arbitrary text data into an Obsidian wiki. The source could be
 
 ## Before You Start
 
-1. Read `.env` to get `OBSIDIAN_VAULT_PATH`
+1. Read `~/.obsidian-wiki/config` (fall back to `.env` in this repo) to get `OBSIDIAN_VAULT_PATH`
 2. Read `.manifest.json` at the vault root — check if this source has been ingested before
 3. Read `index.md` at the vault root to know what already exists
 

@@ -14,7 +14,7 @@ You are performing a destructive operation on the wiki. Always archive first, al
 
 ## Before You Start
 
-1. Read `.env` to get `OBSIDIAN_VAULT_PATH`
+1. Read `~/.obsidian-wiki/config` (fall back to `.env` in this repo) to get `OBSIDIAN_VAULT_PATH`
 2. Read `.manifest.json` to understand current state
 3. **Confirm the user's intent.** This skill supports three modes:
    - **Archive only** — snapshot current wiki, no rebuild

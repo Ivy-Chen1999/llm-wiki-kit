@@ -42,7 +42,7 @@ When check #11 finds synthesis gaps, do NOT list all of them. Instead:
 
 ## Before You Start
 
-1. Read `.env` to get `OBSIDIAN_VAULT_PATH`
+1. Read `~/.obsidian-wiki/config` (fall back to `.env` in this repo) to get `OBSIDIAN_VAULT_PATH`
 2. Read `index.md` for the full page inventory
 3. Read `log.md` for recent activity context
 

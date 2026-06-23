@@ -57,26 +57,20 @@ llm-wiki-kit/
 
 ## Setup
 
+Two commands. The installer is interactive and does everything else (links the skills, asks where the vault should live, creates it, writes the config):
+
 ```bash
-# 1. Clone
 git clone https://github.com/Ivy-Chen1999/llm-wiki-kit.git
 cd llm-wiki-kit
-
-# 2. Link the skills (defaults to ~/.agents/skills; pass another dir to change)
 ./install.sh
-# ./install.sh ~/.claude/skills
-
-# 3. Edit ~/.obsidian-wiki/config (created by install.sh) and set
-#    OBSIDIAN_VAULT_PATH to where you want the vault.
-
-# 4. Create the vault from the template
-cp -R vault-template "$HOME/Documents/my-wiki"
-
-# 5. Optional: install and index local search
-./setup-qmd.sh
 ```
 
-Then open the vault in Obsidian and ask the agent to ingest a source or answer a question.
+Then follow the final instructions it prints: open the vault folder in Obsidian, and ask your agent to ingest a source or answer a question.
+
+Notes:
+- By default the installer links skills into `~/.agents/skills`. To use a different directory: `./install.sh --skills-dir ~/.claude/skills`.
+- It offers to install local search (`qmd`) at the end. Saying no is fine — the skills fall back to `Grep`. You can run `./setup-qmd.sh` later instead.
+- Re-running is safe: existing skills, vault, and config are left untouched.
 
 ## Vault layout
 
