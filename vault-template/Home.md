@@ -1,6 +1,6 @@
 # Welcome to your LLM Wiki
 
-This vault is maintained by an AI agent following the [llm-wiki-kit](https://github.com/) skills. Knowledge is **compiled** here, not re-derived on every question.
+This vault is maintained by an AI agent following the [llm-wiki-kit](https://github.com/Ivy-Chen1999/llm-wiki-kit) skills. Knowledge is **compiled** here, not re-derived on every question.
 
 ## Start here
 

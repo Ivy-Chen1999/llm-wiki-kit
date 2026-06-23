@@ -70,8 +70,8 @@ llm-wiki-kit/
 ## Requirements
 
 - **[Obsidian](https://obsidian.md/)** — to browse and edit the vault.
-- **An agent that reads skills** — these are markdown `SKILL.md` instruction files. Works with [Claudian](https://github.com/) (Obsidian + Claude), Claude Code, or any harness that loads a skills directory.
-- **Optional: [qmd](https://github.com/)** — a local BM25 + vector search engine. Skills fall back to `Grep` automatically if it's absent.
+- **An agent that reads skills** — these are markdown `SKILL.md` instruction files. Works with **Claudian** (the Obsidian + Claude plugin), Claude Code, or any harness that loads a skills directory.
+- **Optional: a local search engine (qmd)** — BM25 + vector search over the vault. Skills fall back to `Grep` automatically if it's absent, so this is not required.
 
 ---
 
@@ -79,7 +79,7 @@ llm-wiki-kit/
 
 ```bash
 # 1. Clone
-git clone <your-fork-url> llm-wiki-kit
+git clone https://github.com/Ivy-Chen1999/llm-wiki-kit.git
 cd llm-wiki-kit
 
 # 2. Install the skills (symlinks into ~/.agents/skills by default)
@@ -126,6 +126,12 @@ my-wiki/
 
 ---
 
+## Credits & acknowledgements
+
+- **The pattern** — [Andrej Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f): treat the wiki as a compiled, compounding artifact maintained by an LLM, with Obsidian as the IDE. The three-layer architecture (raw → wiki → schema) and the "compile, don't re-derive" philosophy come from there. The original write-up is reproduced for reference in [`skills/llm-wiki/references/karpathy-pattern.md`](skills/llm-wiki/references/karpathy-pattern.md).
+- **Obsidian** — the [Obsidian](https://obsidian.md/) markdown knowledge base this kit targets (wikilinks, frontmatter, graph view, Dataview).
+- **The skills** — distilled from a personal Obsidian vault built on the pattern above, then genericized for this kit: hardcoded paths, personal collection names, and non-English strings removed so any vault can use it unchanged.
+
 ## License
 
-MIT — see [LICENSE](LICENSE). Originally distilled from a personal Obsidian vault; genericized so anyone can clone and run their own.
+MIT — see [LICENSE](LICENSE). Free to clone, fork, and adapt.
