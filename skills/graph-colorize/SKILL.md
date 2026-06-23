@@ -14,13 +14,18 @@ description: >
 
 You are rewriting `$OBSIDIAN_VAULT_PATH/.obsidian/graph.json` so Obsidian's graph view tints nodes by tag, folder, or visibility.
 
-Obsidian stores graph settings in `<vault>/.obsidian/graph.json`. The `colorGroups` array is a list of `{query, color}` pairs; the first matching query wins per node. Queries use Obsidian's search syntax: `tag:#foo`, `path:"concepts"`, `file:foo`, etc. Color is `{"a": 1, "rgb": <packed-int>}` where the int is `(R << 16) | (G << 8) | B`.
+Obsidian stores graph settings in `<vault>/.obsidian/graph.json`. The `colorGroups` array is a list of `{query, color}` pairs; the first matching query wins per node. Queries use Obsidian's search syntax: `tag:#foo`, `path:"concepts"`, `file:foo`, and frontmatter property search `["category":"concept"]` (for flat vaults), etc. Color is `{"a": 1, "rgb": <packed-int>}` where the int is `(R << 16) | (G << 8) | B`.
 
 ## Before You Start
 
 1. Read `~/.obsidian-wiki/config`, or fall back to `.env` in this repo, to get `OBSIDIAN_VAULT_PATH`.
 2. Confirm `$OBSIDIAN_VAULT_PATH/.obsidian/` exists. If it doesn't, the vault has never been opened in Obsidian — tell the user to open the vault once in Obsidian, then re-run.
-3. **Warn the user if Obsidian is likely open**: Obsidian overwrites `graph.json` on close. Tell them to close the vault first, or be ready to reload (Cmd/Ctrl+R) and not touch the graph settings until they reload.
+3. **Obsidian must be fully quit before you write** — this is the single most common failure. Obsidian holds graph settings in memory and rewrites `graph.json` from memory on close *and periodically while running*, so a write made while it is open gets silently clobbered within seconds (Cmd/Ctrl+R does **not** reliably save you). The correct sequence is:
+   1. Ask the user to **fully quit** Obsidian (`Cmd+Q` / `Ctrl+Q`), not just close the window.
+   2. Verify it is not running (e.g. `pgrep -x Obsidian`) before writing.
+   3. Write `colorGroups`, then have the user **re-open** Obsidian.
+
+   If you cannot get the user to quit, warn them the change will likely not stick.
 
 ## Step 1: Pick a Mode
 
@@ -66,7 +71,16 @@ Every color is wrapped as `{"a": 1, "rgb": <int>}`.
 
 ### Mode: `by-category`
 
-Use the seven vault top-level folders in this fixed order so colors are stable across runs:
+**First detect the vault layout** — this decides which query type to emit:
+
+- **Folder layout**: categories are top-level folders (`concepts/`, `entities/`, …). Detect by checking whether those folders exist and hold `.md` files.
+- **Flat layout**: all notes live in one `notes/` folder and the category is in frontmatter (`category: concept`). Detect by checking that notes carry a `category:` frontmatter key. (The vault-template shipped with this kit is flat.)
+
+If both signals appear, prefer **flat** when most notes sit in a single folder; otherwise use folder.
+
+#### Folder layout → `path:` queries
+
+Use these top-level folders in this fixed order so colors are stable across runs:
 
 | Folder | Color index |
 |---|---|
@@ -78,11 +92,32 @@ Use the seven vault top-level folders in this fixed order so colors are stable a
 | `projects` | 5 (yellow) |
 | `journal` | 6 (purple) |
 
-Emit one entry per folder that exists AND contains at least one `.md` file. Each entry is:
+Emit one entry per folder that exists AND contains at least one `.md` file:
 
 ```json
 {"query": "path:\"<folder>\"", "color": {"a": 1, "rgb": <int>}}
 ```
+
+#### Flat layout → frontmatter property queries
+
+Scan the actual `category:` values in `notes/**/*.md` (e.g. `grep -rh "^category:" notes/ | sort | uniq -c`). Map each value to a color using this fixed order so colors stay stable across runs:
+
+| `category` value | Color index |
+|---|---|
+| `concept` | 0 (blue) |
+| `entity` | 1 (orange) |
+| `reference` | 3 (teal) |
+| `insight` | 4 (green) |
+| `synthesis` | 5 (yellow) |
+| `event` | 6 (purple) |
+
+For any category value not in this table, assign the next unused palette color. Emit one entry per category value that actually occurs, using Obsidian's **property search** syntax (note the escaped quotes inside the JSON string):
+
+```json
+{"query": "[\"category\":\"concept\"]", "color": {"a": 1, "rgb": 5142951}}
+```
+
+> Property queries require a reasonably recent Obsidian (1.4+). If the user reports the groups appear in the panel but nodes stay uncolored, their Obsidian is too old for property search — fall back to `by-tag`, or add a `category/<value>` nested tag to each note's frontmatter `tags` and color by `tag:#category/<value>`.
 
 ### Mode: `by-visibility`
 
@@ -152,9 +187,9 @@ Graph colorized → .obsidian/graph.json
   Palette: blue, orange, red, teal, green, yellow, purple
   Backup:  .obsidian/graph.json.backup-20260424-1432
 
-Reload Obsidian (Cmd/Ctrl+R) to see the new colors.
-If Obsidian is currently open, close it first OR reload immediately — Obsidian
-overwrites graph.json on close and can erase these changes.
+Re-open Obsidian to see the new colors (open Graph view → expand "Color groups").
+This write was made with Obsidian fully quit, so it will persist. Editing graph.json
+while Obsidian is running gets overwritten — always quit first.
 ```
 
 Append to `$VAULT_PATH/log.md`:
@@ -170,7 +205,9 @@ Append to `$VAULT_PATH/log.md`:
 - **User wants to clear all color groups** → set `colorGroups: []`, back up, log as `GRAPH_COLORIZE mode=clear`.
 - **`.obsidian/` missing** → the vault hasn't been opened in Obsidian yet. Tell the user to open it once, then re-run. Don't create `.obsidian/` yourself — Obsidian populates many files there on first open.
 - **Query syntax gotchas**: folder paths with spaces need quoting (`path:"my folder"`); tags with nested slashes work literally (`tag:#visibility/internal`); don't URL-encode.
-- **Obsidian open during edit**: surface the risk — Obsidian reads graph.json at startup and **rewrites it on close**. If the user is editing live, tell them to close Obsidian first or run the reload (Cmd/Ctrl+R) immediately and avoid opening graph settings before they do.
+- **Obsidian open during edit** (most common failure): Obsidian rewrites graph.json from memory on close *and periodically while running*, so writes made while it is open are clobbered within seconds — Cmd/Ctrl+R does not reliably help. Always have the user **fully quit** (`Cmd+Q`) first, verify with `pgrep -x Obsidian`, then write, then re-open. See "Before You Start" step 3.
+- **Groups show in panel but nodes stay gray** (flat-layout vaults): the Obsidian version is too old for `["category":...]` property search. Fall back to `by-tag`, or add `category/<value>` nested tags and color by `tag:`.
+- **New category value appears later**: a category not in the mapping gets no entry and its nodes stay default gray — re-run to pick it up.
 
 ## Notes
 
