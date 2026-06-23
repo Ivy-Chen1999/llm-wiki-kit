@@ -82,6 +82,28 @@ The skills resolve the target vault in this order (highest first):
 
 So to keep a vault self-contained, drop a `.env` at its root pointing `OBSIDIAN_VAULT_PATH` at itself (and give it its own `QMD_WIKI_COLLECTION`). Work from that vault and the skills target only it — the global default and your other vaults are untouched.
 
+## How to use it — just say what you want
+
+You don't memorize skill names. Skills trigger automatically from what you say — Claude matches your message to the right one. Open your vault in Claude and talk normally:
+
+| You want to… | Just say something like… |
+|---|---|
+| Add an article / file / folder | "add this to my wiki", "ingest these docs" |
+| Add a web page | "save this link to my wiki", paste a URL + "add this" |
+| Ask what you know | "what do I know about X?", "find everything on Y" |
+| Quick answer (no deep read) | "quick answer: …", "just scan for …" |
+| Save the current chat | "save this conversation to my wiki" |
+| Connect related notes | "find missing links", "my wiki feels disconnected" |
+| Find cross-cutting themes | "what concepts keep coming up together?" |
+| Check health / fix issues | "audit my wiki", "what needs fixing?" |
+| See what's been ingested | "what's the status of my wiki?" |
+| Research a topic from the web | "research X and file it", "deep dive on Y" |
+| Tidy up tags | "clean up my tags", "normalize tags" |
+| Color the graph | "color my graph by category" |
+| Start fresh | "archive and rebuild the wiki" |
+
+If a phrasing doesn't trigger the right skill, just name it ("use wiki-ingest") — but normal language usually works.
+
 ## Vault layout
 
 The `vault-template/` uses a flat layout: all notes live in `notes/`, and the category is set in frontmatter (`category: concept|entity|reference|insight|synthesis`).
