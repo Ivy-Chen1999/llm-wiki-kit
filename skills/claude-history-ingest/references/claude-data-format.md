@@ -5,7 +5,7 @@
 `~/.claude/projects/` contains one directory per project the user has opened with Claude Code. Directory names encode the absolute path:
 
 ```
-/Users/name/Documents/projects/my-app → -Users/name/Documents/projects/my-app
+/path/to/projects/my-app → -Users/name/Documents/projects/my-app
 ```
 
 To recover the original path: replace leading `-` with `/`, then replace remaining `-` cautiously (dashes also appear in directory names). The `cwd` field in session/conversation data gives you the canonical path.
@@ -31,7 +31,7 @@ Each line is one event. Relevant event types:
   "message": { "role": "user", "content": "the user's message as a string" },
   "timestamp": "2026-03-15T10:30:00.000Z",
   "sessionId": "uuid",
-  "cwd": "/Users/name/Documents/projects/my-app"
+  "cwd": "/path/to/projects/my-app"
 }
 ```
 
@@ -95,7 +95,7 @@ Located at `~/.claude/sessions/<pid>.json`. Light metadata:
 {
   "pid": 12345,
   "sessionId": "uuid",
-  "cwd": "/Users/name/Documents/projects/my-app",
+  "cwd": "/path/to/projects/my-app",
   "startedAt": "2026-03-15T10:30:00.000Z",
   "kind": "interactive",
   "entrypoint": "cli"
