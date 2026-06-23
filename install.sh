@@ -105,4 +105,7 @@ cat <<EOF
    2. Ask your agent:  "ingest this article into my wiki"
                        "what do I know about X?"
                        "audit my wiki"
+
+  Tip: the 20 skills are the shared core. Make your own (a retro, a daily
+  digest, your ingest style) — see personal-skills/ in this repo for templates.
 EOF

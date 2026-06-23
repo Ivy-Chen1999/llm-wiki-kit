@@ -91,6 +91,16 @@ my-wiki/
 
 If you prefer one folder per category, `wiki-setup` can generate that layout instead.
 
+## Make it your own
+
+The 20 skills above are the shared core. The skills that pay off most are usually personal — shaped around how *you* work. You're encouraged to add your own:
+
+- a **retro** skill that writes a project post-mortem into the vault,
+- a **digest** skill that pulls your todos + field news into a dated entry,
+- your own **ingest house-style**, or a **dispatcher** that routes "/wiki do X".
+
+[`personal-skills/`](personal-skills/) has a blank template and two worked examples (retro, digest) to copy and adapt. Personal skills live in `~/.claude/skills/`, not in this repo — so updating the shared core (`git pull`) never touches them.
+
 ## Credits
 
 - The pattern comes from [Andrej Karpathy's LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (the three-layer structure and the idea of processing a source once instead of re-searching it each time). His original write-up is included in `skills/llm-wiki/references/karpathy-pattern.md`.
