@@ -16,7 +16,7 @@ There are three layers:
 
 ```
 llm-wiki-kit/
-├── skills/          18 agent skills
+├── skills/          20 agent skills
 ├── vault-template/  an empty vault you can copy and start using
 ├── .env.example     config (vault path, sources, search)
 ├── install.sh       links the skills into your agent's skills directory
@@ -33,6 +33,8 @@ llm-wiki-kit/
 | `wiki-ingest` | Turns a raw source into wiki notes. |
 | `ingest-url` | Fetches a URL and ingests it. |
 | `data-ingest` | Ingests structured/tabular data. |
+| `claude-history-ingest` | Mines Claude conversation history into the wiki. |
+| `codex-history-ingest` | Mines Codex CLI session history into the wiki. |
 | `wiki-query` | Answers questions from the wiki, with links to source notes. |
 | `wiki-research` | Runs web research and files the results into the wiki. |
 | `wiki-update` | Revises existing notes as things change. |
