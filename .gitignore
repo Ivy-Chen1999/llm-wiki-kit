@@ -1,0 +1,15 @@
+# Local config — never commit real paths
+.env
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Obsidian per-user workspace state (keep app.json/appearance.json if you commit a vault)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+
+# qmd local index
+.qmd/
+*.qmd-index
