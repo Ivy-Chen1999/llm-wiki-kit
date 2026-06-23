@@ -29,7 +29,17 @@ A collection of interconnected Obsidian-compatible markdown files organized by c
 - Obsidian `[[wikilinks]]` connecting related concepts
 - Clear provenance — every claim traces back to a source
 
-The wiki lives at the path configured via `OBSIDIAN_VAULT_PATH` in `.env`.
+The wiki lives at the path given by `OBSIDIAN_VAULT_PATH` (see *Resolving the vault path* below).
+
+### Resolving the vault path
+
+Every skill resolves `OBSIDIAN_VAULT_PATH` with this precedence, highest first. This is what lets one machine work with several vaults without them interfering:
+
+1. **The `OBSIDIAN_VAULT_PATH` environment variable**, if set — a per-session override.
+2. **A `.env` in the current working directory** — vault-scoped. Put a `.env` at a vault's root (or run the skill from inside it) and that vault wins, regardless of the global default.
+3. **`~/.obsidian-wiki/config`** — the global default, written by `install.sh`.
+
+Always read only the variables a skill needs; never echo or log other values. Never hardcode an absolute vault path in a skill.
 
 ### Layer 3: The Schema (this skill + config)
 

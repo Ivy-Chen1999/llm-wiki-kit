@@ -13,7 +13,7 @@ You are running an autonomous research loop on a topic, synthesizing what you fi
 
 ## Before You Start
 
-Resolve `VAULT` from config: read `~/.obsidian-wiki/config` (or the repo's `.env`) to get `OBSIDIAN_VAULT_PATH`, and set `VAULT` to that value. Works from any project directory.
+Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Set `VAULT` to that `OBSIDIAN_VAULT_PATH`.
 
 1. Read `$VAULT/_system/index.md` to understand what's already in the wiki — don't re-research things the wiki covers well
 2. Read `$VAULT/_system/hot.md` — surfaces recent context and active threads

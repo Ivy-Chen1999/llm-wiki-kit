@@ -16,7 +16,7 @@ This skill can be invoked directly or via the `wiki-history-ingest` router (`/wi
 
 ## Before You Start
 
-1. Read `.env` to get `OBSIDIAN_VAULT_PATH` and `CLAUDE_HISTORY_PATH` (defaults to `~/.claude`)
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Also read `CLAUDE_HISTORY_PATH` (defaults to `~/.claude`).
 2. Read `.manifest.json` at the vault root to check what's already been ingested
 3. Read `index.md` at the vault root to know what the wiki already contains
 

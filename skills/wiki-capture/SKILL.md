@@ -14,7 +14,7 @@ You are preserving knowledge from the current conversation as a permanent wiki n
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH`
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand existing wiki content (avoid duplicates)
 3. Read `$OBSIDIAN_VAULT_PATH/hot.md` if it exists — it gives context on recent activity
 

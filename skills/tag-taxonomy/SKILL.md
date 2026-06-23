@@ -15,7 +15,7 @@ You are enforcing consistent tagging across the wiki by normalizing tags to a co
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (fall back to `.env` in this repo) to get `OBSIDIAN_VAULT_PATH`
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Read `$OBSIDIAN_VAULT_PATH/_meta/taxonomy.md` — this is the canonical tag list
 3. Read `index.md` to understand the wiki's scope
 

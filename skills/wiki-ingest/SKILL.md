@@ -15,7 +15,7 @@ You are ingesting source documents into an Obsidian wiki. Your job is not to sum
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH` and `OBSIDIAN_SOURCES_DIR`. Only read the specific variables you need — do not log, echo, or reference any other values from these files.
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Also read `OBSIDIAN_SOURCES_DIR` from the same source. Only read the specific variables you need — do not log, echo, or reference any other values.
 2. Read `.manifest.json` at the vault root to check what's already been ingested
 3. Read `index.md` to understand current wiki content
 4. Read `log.md` to understand recent activity

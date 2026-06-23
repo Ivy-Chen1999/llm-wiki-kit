@@ -18,7 +18,7 @@ You are weaving the wiki's knowledge graph tighter by finding and inserting miss
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (fall back to `.env` in this repo) to get `OBSIDIAN_VAULT_PATH`
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Read `index.md` to get the full inventory of pages and their one-line descriptions
 3. Skim `log.md` to see what was recently ingested (focus linking effort on new pages)
 

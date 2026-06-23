@@ -13,7 +13,7 @@ You are distilling knowledge from the current project into the user's Obsidian w
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` to get:
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Read these from the chosen source:
    - `OBSIDIAN_VAULT_PATH` — where the wiki lives
    - `OBSIDIAN_WIKI_REPO` — where the obsidian-wiki repo is cloned (for reading other skills if needed)
 2. If `~/.obsidian-wiki/config` doesn't exist, tell the user to run `bash setup.sh` from their obsidian-wiki repo first.

@@ -15,7 +15,7 @@ You are answering questions against a compiled Obsidian wiki, not raw source doc
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` to get `OBSIDIAN_VAULT_PATH` (works from any project). Fall back to `.env` if you're inside the obsidian-wiki repo.
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. If `$OBSIDIAN_VAULT_PATH/hot.md` exists, read it first — it gives you instant context on recent activity. If the user's question is about something ingested recently, hot.md may answer it before you even open `index.md`.
 3. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand the wiki's scope and structure
 

@@ -15,7 +15,7 @@ You are creating a `.base` file — an Obsidian Bases definition that turns vaul
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH`
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand what categories and pages exist
 3. Ask the user what they want to view if not specified — what folder, tag, category, or date range?
 

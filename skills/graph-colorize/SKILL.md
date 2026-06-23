@@ -18,7 +18,7 @@ Obsidian stores graph settings in `<vault>/.obsidian/graph.json`. The `colorGrou
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config`, or fall back to `.env` in this repo, to get `OBSIDIAN_VAULT_PATH`.
+1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Confirm `$OBSIDIAN_VAULT_PATH/.obsidian/` exists. If it doesn't, the vault has never been opened in Obsidian — tell the user to open the vault once in Obsidian, then re-run.
 3. **Obsidian must be fully quit before you write** — this is the single most common failure. Obsidian holds graph settings in memory and rewrites `graph.json` from memory on close *and periodically while running*, so a write made while it is open gets silently clobbered within seconds (Cmd/Ctrl+R does **not** reliably save you). The correct sequence is:
    1. Ask the user to **fully quit** Obsidian (`Cmd+Q` / `Ctrl+Q`), not just close the window.

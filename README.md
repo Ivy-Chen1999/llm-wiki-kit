@@ -72,6 +72,16 @@ Notes:
 - It offers to install local search (`qmd`) at the end. Saying no is fine — the skills fall back to `Grep`. You can run `./setup-qmd.sh` later instead.
 - Re-running is safe: existing skills, vault, and config are left untouched.
 
+### Working with more than one vault
+
+The skills resolve the target vault in this order (highest first):
+
+1. an `OBSIDIAN_VAULT_PATH` environment variable (per-session override),
+2. a `.env` at the current working directory / vault root (**vault-scoped**),
+3. `~/.obsidian-wiki/config` (the global default).
+
+So to keep a vault self-contained, drop a `.env` at its root pointing `OBSIDIAN_VAULT_PATH` at itself (and give it its own `QMD_WIKI_COLLECTION`). Work from that vault and the skills target only it — the global default and your other vaults are untouched.
+
 ## Vault layout
 
 The `vault-template/` uses a flat layout: all notes live in `notes/`, and the category is set in frontmatter (`category: concept|entity|reference|insight|synthesis`).
