@@ -71,7 +71,7 @@ llm-wiki-kit/
 
 - **[Obsidian](https://obsidian.md/)** — to browse and edit the vault.
 - **An agent that reads skills** — these are markdown `SKILL.md` instruction files. Works with **Claudian** (the Obsidian + Claude plugin), Claude Code, or any harness that loads a skills directory.
-- **Optional: a local search engine (qmd)** — BM25 + vector search over the vault. Skills fall back to `Grep` automatically if it's absent, so this is not required.
+- **Optional: a local search engine (qmd)** — BM25 + vector search over the vault. Skills fall back to `Grep` automatically if it's absent, so this is not required. Install + index in one step with [`./setup-qmd.sh`](setup-qmd.sh), or manually: `npm install -g @tobilu/qmd` then `qmd collection add "$OBSIDIAN_VAULT_PATH" --name wiki && qmd embed`.
 
 ---
 
@@ -94,13 +94,16 @@ cd llm-wiki-kit
 # 4. Create the vault from the template
 cp -R vault-template "$HOME/Documents/my-wiki"
 
-# 5. Open it in Obsidian, then talk to your agent:
+# 5. (Optional) Install + index local search for faster, semantic queries
+./setup-qmd.sh
+
+# 6. Open it in Obsidian, then talk to your agent:
 #    "ingest this article into my wiki"   → wiki-ingest
 #    "what do I know about X?"             → wiki-query
 #    "audit my wiki"                       → wiki-lint
 ```
 
-That's it — clone, install, point at a vault, start ingesting.
+That's it — clone, install, point at a vault, start ingesting. Step 5 is optional; skip it and the skills use `Grep` instead.
 
 ---
 
