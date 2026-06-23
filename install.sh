@@ -8,7 +8,7 @@
 #   5. optionally installs local search (qmd)
 #
 # Just run:  ./install.sh
-# Advanced:  ./install.sh --skills-dir ~/.claude/skills
+# Advanced:  ./install.sh --skills-dir ~/.agents/skills   (for non-Claude agents)
 #
 set -euo pipefail
 
@@ -16,7 +16,9 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_SRC="$REPO_DIR/skills"
 CONFIG_DIR="$HOME/.obsidian-wiki"
 CONFIG_FILE="$CONFIG_DIR/config"
-SKILLS_DIR="$HOME/.agents/skills"
+# Claude (Claude Code and the Claudian Obsidian plugin) reads user skills from
+# ~/.claude/skills. Override with --skills-dir for other agents.
+SKILLS_DIR="$HOME/.claude/skills"
 
 # --- parse optional flag ---
 while [ $# -gt 0 ]; do

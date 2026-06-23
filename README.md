@@ -68,7 +68,7 @@ cd llm-wiki-kit
 Then follow the final instructions it prints: open the vault folder in Obsidian, and ask your agent to ingest a source or answer a question.
 
 Notes:
-- By default the installer links skills into `~/.agents/skills`. To use a different directory: `./install.sh --skills-dir ~/.claude/skills`.
+- The installer links skills into `~/.claude/skills`, which Claude (Claude Code and the Claudian Obsidian plugin) reads automatically. For another agent: `./install.sh --skills-dir <that agent's skills dir>`.
 - It offers to install local search (`qmd`) at the end. Saying no is fine — the skills fall back to `Grep`. You can run `./setup-qmd.sh` later instead.
 - Re-running is safe: existing skills, vault, and config are left untouched.
 
