@@ -19,7 +19,7 @@ You are ingesting arbitrary text data into an Obsidian wiki. The source could be
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Read `.manifest.json` at the vault root — check if this source has been ingested before
-3. Read `index.md` at the vault root to know what already exists
+3. Read `_system/index.md` to know what already exists
 
 If the source path is already in `.manifest.json` and the file hasn't been modified since `ingested_at`, tell the user it's already been ingested. Ask if they want to re-ingest anyway.
 
@@ -115,7 +115,7 @@ Before creating pages:
 
 Follow the `wiki-ingest` skill's process for creating/updating pages:
 
-- Use correct category directories (`concepts/`, `entities/`, `skills/`, etc.)
+- Write every page flat into `notes/` — there are no per-type folders. Set the note's type with the `category:` frontmatter field (`concept`, `entity`, `reference`, `insight`, or `synthesis`).
 - Add YAML frontmatter with title, category, tags, sources
 - Use `[[wikilinks]]` to connect to existing pages
 - Attribute claims to their source
@@ -132,17 +132,17 @@ Follow the `wiki-ingest` skill's process for creating/updating pages:
   "modified_at": FILE_MTIME,
   "source_type": "data",  // or "image" for png/jpg/webp/gif sources
   "project": "project-name-or-null",
-  "pages_created": ["list/of/pages.md"],
-  "pages_updated": ["list/of/pages.md"]
+  "pages_created": ["notes/page-a.md", "notes/page-b.md"],
+  "pages_updated": ["notes/page-c.md"]
 }
 ```
 
-**`index.md`** and **`log.md`**:
+**`_system/index.md`** and **`_system/log.md`**:
 ```
 - [TIMESTAMP] DATA_INGEST source="path/to/data" format=FORMAT pages_updated=X pages_created=Y
 ```
 
-**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with the most meaningful thing extracted from this data source — last 3 operations max. Update `updated` timestamp.
+**`_system/hot.md`** — Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with the most meaningful thing extracted from this data source — last 3 operations max. Update `updated` timestamp.
 
 ## Tips
 

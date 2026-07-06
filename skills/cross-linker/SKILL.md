@@ -19,18 +19,18 @@ You are weaving the wiki's knowledge graph tighter by finding and inserting miss
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
-2. Read `index.md` to get the full inventory of pages and their one-line descriptions
-3. Skim `log.md` to see what was recently ingested (focus linking effort on new pages)
+2. Read `_system/index.md` to get the full inventory of pages and their one-line descriptions
+3. Skim `_system/log.md` to see what was recently ingested (focus linking effort on new pages)
 
 ## Step 1: Build the Page Registry
 
-Glob all `.md` files in the vault (excluding `_archives/`, `.obsidian/`). For each page, extract:
+All knowledge notes live flat in `notes/`. Glob every `.md` file under `notes/` (skip `_archives/`, `_visual/`, `_system/`, and `.obsidian/`). For each page, extract:
 
-- **Filename** (without `.md`) — this is the wikilink target
+- **Filename** (without `.md`) — this is the wikilink target, a bare basename
 - **Title** from frontmatter
 - **Aliases** from frontmatter (if any)
 - **Tags** from frontmatter
-- **Category** from frontmatter or directory inference
+- **Category** from the frontmatter `category:` field (`concept | entity | reference | insight | synthesis`)
 - **One-line summary** — first sentence or `title` field
 
 Build a lookup table:
@@ -48,20 +48,20 @@ For each page in the vault:
 1. **Read the full content**
 2. **Extract existing wikilinks** — find all `[[...]]` references already present
 3. **Search for unlinked mentions** — check if the page's text contains any of these, without being wrapped in `[[...]]`:
-   - Page filenames (e.g., the word "MyProject" appears but `[[projects/my-project/my-project]]` is missing)
+   - Page filenames (e.g., the word "MyProject" appears but `[[my-project]]` is missing)
    - Page titles from frontmatter
    - Aliases from frontmatter
    - Entity names, project names, concept names from the registry
 
-4. **Check for semantic connections** — pages that share multiple tags or are in the same project directory but don't link to each other
+4. **Check for semantic connections** — pages that share multiple tags, or share the same `project:` frontmatter value, but don't link to each other
 
 ### Matching Rules
 
 - **Case-insensitive matching** for names (e.g., "my-project" matches page `MyProject`)
-- **Diacritic-insensitive matching** — normalize both the page name and the body text with Unicode NFKD (decompose accented characters to base + combining marks, strip combining marks) before comparing. This ensures body text "Muller" matches page `[[entities/müller]]` and vice versa.
+- **Diacritic-insensitive matching** — normalize both the page name and the body text with Unicode NFKD (decompose accented characters to base + combining marks, strip combining marks) before comparing. This ensures body text "Muller" matches page `[[müller]]` and vice versa.
 - **Skip self-references** — a page shouldn't link to itself
 - **Skip common words** — don't link "the", "and", generic terms. Only match on distinctive names
-- **Prefer the shortest unambiguous wikilink path** — use `[[page-name]]` not `[[full/path/to/page-name]]` when the name is unique across the vault
+- **Always use bare basenames** — write `[[page-name]]`, never a folder-qualified path. The vault is flat and basenames are unique, so Obsidian resolves them directly. If you encounter a legacy folder-qualified link such as `[[concepts/page-name]]` or `[[entities/page-name]]`, rewrite it in place to bare `[[page-name]]`.
 - **Don't link inside code blocks** or frontmatter
 - **Don't double-link** — if `[[foo]]` already appears on the page, don't add another
 
@@ -75,9 +75,9 @@ Not every possible link is worth adding. Score each candidate using a composite 
 |---|---|---|
 | **Exact name match in text** | +4 | "MyProject" appears in body text → link to my-project.md |
 | **Shared tags (2+)** | +2 | Both tagged `#ai #agent` but no link between them |
-| **Same project, no link** | +2 | Both under `projects/my-project/` but don't reference each other |
-| **Mentioned entity/concept** | +2 | Page mentions "knowledge graphs" → link to `[[concepts/knowledge-graphs]]` |
-| **Cross-category connection** | +2 | Source is in `concepts/`, target is in `entities/` (or `skills/` ↔ `synthesis/`) — different knowledge layers make this link more architecturally valuable |
+| **Same project, no link** | +2 | Both carry the same `project:` frontmatter value but don't reference each other |
+| **Mentioned entity/concept** | +2 | Page mentions "knowledge graphs" → link to `[[knowledge-graphs]]` |
+| **Cross-category connection** | +2 | Source has `category: concept`, target has `category: entity` (or `insight` ↔ `synthesis`) — different knowledge layers make this link more architecturally valuable |
 | **Peripheral→hub reach** | +2 | Source page has ≤ 2 total links (peripheral) but target has ≥ 8 (hub) — connecting a loose page to a load-bearing concept |
 | **Partial name match** | +1 | "graph" appears but page is `knowledge-graphs` — plausible but ambiguous |
 
@@ -108,10 +108,10 @@ This project uses knowledge graphs to connect entities.
 
 **After:**
 ```markdown
-This project uses [[concepts/knowledge-graphs|knowledge graphs]] to connect entities.
+This project uses [[knowledge-graphs|knowledge graphs]] to connect entities.
 ```
 
-Use the `[[path|display text]]` format when the wikilink path differs from the display text.
+Use the `[[basename|display text]]` format when the target basename differs from the display text.
 
 ### 4b: Related section (fallback)
 
@@ -120,37 +120,13 @@ If the term isn't mentioned naturally in the body but the pages are semantically
 ```markdown
 ## Related
 
-- [[projects/my-project/my-project]] — Also uses AI agents for research automation
-- [[concepts/knowledge-graphs]] — Core technique used in this project
+- [[my-project]] — Also uses AI agents for research automation
+- [[knowledge-graphs]] — Core technique used in this project
 ```
 
 If a `## Related` section already exists, append to it. Don't duplicate existing entries.
 
-## Step 5: Score Misc Page Affinity
-
-After the main linking pass, update affinity scores for all pages in `misc/` (pages with `promotion_status: misc` in their frontmatter, or located under the `misc/` directory).
-
-For each misc page:
-
-1. **Collect outgoing links** — all `[[wikilinks]]` in the page body
-2. **Collect incoming links** — grep the vault for `[[misc/<slug>]]` and `[[<slug>]]` references
-3. For each linked page (both directions), check if it belongs to a project:
-   - Lives under `projects/<project-name>/`
-   - Has a `project:` frontmatter field matching a project name
-4. Group by project name and sum: `outgoing_links + incoming_links`
-5. Update the `affinity` frontmatter block on the misc page:
-
-```yaml
-affinity:
-  obsidian-wiki: 3
-  another-project: 1
-```
-
-6. If any project's score ≥ 3: flag this page as a **promotion candidate** and record it for the report
-
-**Efficiency note:** only read the full body of misc pages — other pages only need a frontmatter grep to determine their project membership.
-
-## Step 6: Report
+## Step 5: Report
 
 Present a summary:
 
@@ -161,36 +137,27 @@ Present a summary:
 
 | Page | Links Added | Confidence | Type |
 |---|---|---|---|
-| `projects/my-project/my-project.md` | 3 | EXTRACTED | 2 inline, 1 related |
-| `entities/jane-doe.md` | 5 | INFERRED | 3 inline, 2 related |
+| `notes/my-project.md` | 3 | EXTRACTED | 2 inline, 1 related |
+| `notes/jane-doe.md` | 5 | INFERRED | 3 inline, 2 related |
 | ... | | | |
 
 ### Orphan Pages Remaining: 2
-- `references/foo.md` — no incoming or outgoing links found
-- `concepts/bar.md` — could not find related pages
-
-### Misc Promotion Candidates: N
-Pages in misc/ that have ≥ 3 connections to a single project — ready to be promoted:
-
-| Page | Top Project | Score |
-|---|---|---|
-| `misc/web-martinfowler-articles-microservices.md` | `obsidian-wiki` | 4 |
-
-To promote: move the page to `projects/<project-name>/references/` and update all backlinks.
+- `notes/foo.md` — no incoming or outgoing links found
+- `notes/bar.md` — could not find related pages
 
 ### Pages Skipped: 3
-- `index.md`, `log.md` — special files
+- `_system/index.md`, `_system/log.md` — bookkeeping files
 - `_archives/*` — archived content
 ```
 
-## Step 7: Update Log and Hot Cache
+## Step 6: Update Log and Hot Cache
 
-Append to `log.md`:
+Append to `_system/log.md`:
 ```
-- [TIMESTAMP] CROSS_LINK pages_scanned=N links_added=M pages_modified=P orphans_remaining=Q misc_affinity_updated=R promotion_candidates=S
+- [TIMESTAMP] CROSS_LINK pages_scanned=N links_added=M pages_modified=P orphans_remaining=Q
 ```
 
-**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary of what was linked — e.g. "Cross-linked 23 mentions across 12 pages; 2 orphans remain." Keep the last 3 operations. Update `updated` timestamp.
+**`_system/hot.md`** — Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary of what was linked — e.g. "Cross-linked 23 mentions across 12 pages; 2 orphans remain." Keep the last 3 operations. Update `updated` timestamp.
 
 ## Tips
 

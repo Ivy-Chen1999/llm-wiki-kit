@@ -123,7 +123,7 @@ my-wiki/
     └── tags.md   tag list
 ```
 
-If you prefer one folder per category, `wiki-setup` can generate that layout instead.
+Every note is a file in `notes/`; its type is the frontmatter `category:`, not its folder. This keeps links, search, and cross-referencing folder-independent — the whole kit assumes this one layout.
 
 ## Make it your own
 

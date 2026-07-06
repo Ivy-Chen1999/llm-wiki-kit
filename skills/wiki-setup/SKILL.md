@@ -35,18 +35,27 @@ If `.env` doesn't exist, create it from `.env.example`. Ask the user for:
 
 ## Step 2: Create Vault Directory Structure
 
+This vault is **flat**: every knowledge note lives directly in `notes/`, and a note's type is set by its YAML frontmatter `category:` (`concept | entity | reference | insight | synthesis`) — never by which folder it sits in. Create exactly these directories:
+
 ```bash
-mkdir -p "$OBSIDIAN_VAULT_PATH"/{concepts,entities,skills,references,synthesis,journal,projects,_archives,_raw,.obsidian}
+mkdir -p "$OBSIDIAN_VAULT_PATH"/{notes,raw,journal,Templates,_system,_archives,.obsidian}
 ```
 
-- `.obsidian/` — Obsidian's own config. Creates vault recognition.
-- `projects/` — Per-project knowledge (populated during ingest).
+- `notes/` — Every knowledge note lives here, flat. Type comes from frontmatter `category:`, not from a subfolder. Do NOT create per-type folders like `concepts/` or `entities/`.
+- `raw/` — Staging area for unprocessed drafts. Drop rough notes here; `wiki-ingest` will promote them into `notes/` (with the right `category:`) and delete the originals. Honors `OBSIDIAN_RAW_DIR` if set (default `raw`).
+- `journal/` — Daily notes and dated entries.
+- `Templates/` — Note templates used when creating new pages.
+- `_system/` — Bookkeeping lives here: `index.md`, `hot.md`, `log.md`, `tags.md`.
 - `_archives/` — Stores wiki snapshots for rebuild/restore operations.
-- `_raw/` — Staging area for unprocessed drafts. Drop rough notes here; `wiki-ingest` will promote them to proper wiki pages and delete the originals.
+- `.obsidian/` — Obsidian's own config. Creates vault recognition.
 
 ## Step 3: Create Special Files
 
-### index.md
+All bookkeeping files live under `_system/`, never at the vault root.
+
+### _system/index.md
+
+The index groups notes by their frontmatter `category:` — these are heading sections in one file, not folders on disk.
 
 ```markdown
 ---
@@ -63,16 +72,16 @@ title: Wiki Index
 
 ## Entities
 
-## Skills
-
 ## References
+
+## Insights
 
 ## Synthesis
 
 ## Journal
 ```
 
-### log.md
+### _system/log.md
 
 ```markdown
 ---
@@ -81,10 +90,10 @@ title: Wiki Log
 
 # Wiki Log
 
-- [TIMESTAMP] INIT vault_path="OBSIDIAN_VAULT_PATH" categories=concepts,entities,skills,references,synthesis,journal
+- [TIMESTAMP] INIT vault_path="OBSIDIAN_VAULT_PATH" layout=flat categories=concept,entity,reference,insight,synthesis
 ```
 
-### hot.md
+### _system/hot.md
 
 ```markdown
 ---
@@ -111,6 +120,24 @@ updated: TIMESTAMP
 ## Flagged Contradictions
 
 *None yet.*
+```
+
+### _system/tags.md
+
+The tag whitelist. New notes may only use tags listed here — add a tag to this file before using it.
+
+```markdown
+---
+title: Tag Whitelist
+---
+
+# Tag Whitelist
+
+Only tags listed below may be used on new notes. Add a tag here before applying it.
+
+## Tags
+
+*No tags yet. Add tags as your vault grows.*
 ```
 
 ## Step 4: Create .obsidian Configuration
@@ -146,10 +173,11 @@ Tell the user about these recommended community plugins (they install manually):
 ## Step 6: Verify Setup
 
 Run a quick sanity check:
-- [ ] Vault directory exists with: `concepts/`, `entities/`, `skills/`, `references/`, `synthesis/`, `journal/`, `projects/`, `_archives/`, `_raw/`
-- [ ] `index.md` exists at vault root
-- [ ] `log.md` exists at vault root
-- [ ] `hot.md` exists at vault root
+- [ ] Vault directory exists with: `notes/`, `raw/`, `journal/`, `Templates/`, `_system/`, `_archives/`, `.obsidian/`
+- [ ] `_system/index.md` exists
+- [ ] `_system/log.md` exists
+- [ ] `_system/hot.md` exists
+- [ ] `_system/tags.md` exists
 - [ ] `.env` has `OBSIDIAN_VAULT_PATH` set
 - [ ] `.obsidian/` directory exists
 - [ ] Source directories (if configured) exist and are readable

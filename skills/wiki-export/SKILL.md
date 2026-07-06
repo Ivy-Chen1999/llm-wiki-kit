@@ -32,12 +32,12 @@ Pages with no `visibility/` tag, or tagged `visibility/public`, are always inclu
 
 ## Step 1: Build the Node and Edge Lists
 
-Glob all `.md` files in the vault (excluding `_archives/`, `_raw/`, `.obsidian/`, `index.md`, `log.md`, `_insights.md`). In filtered mode, also skip pages whose tags contain `visibility/internal` or `visibility/pii`.
+Glob all `.md` files in the vault's `notes/` directory — every knowledge note lives flat here. Bookkeeping files (under `_system/`), raw staging (`raw/`), `_archives/`, and `.obsidian/` all sit outside `notes/`, so they are excluded automatically. In filtered mode, also skip pages whose tags contain `visibility/internal` or `visibility/pii`.
 
 For each page, extract from frontmatter:
-- `id` — relative path from vault root, without `.md` extension (e.g. `concepts/transformers`)
+- `id` — the note's basename, without `.md` extension (e.g. `transformers`). Notes are flat in `notes/`, so basenames are unique and serve as stable ids.
 - `label` — `title` field from frontmatter, or filename if missing
-- `category` — directory prefix (`concepts`, `entities`, `skills`, `references`, `synthesis`, `projects`, or `journal`)
+- `category` — the frontmatter `category:` field (`concept`, `entity`, `reference`, `insight`, or `synthesis`)
 - `tags` — array from frontmatter tags field
 - `summary` — frontmatter `summary` field if present
 
@@ -45,7 +45,7 @@ This is your **node list**.
 
 For each page, Grep the body for `\[\[.*?\]\]` to extract all wikilinks:
 - Parse each `[[target]]` or `[[target|display]]` — use the target part only
-- Resolve the target to a node id (normalize: lowercase, spaces→hyphens, strip `.md`)
+- Resolve the target to a node id (normalize: take the basename, lowercase, spaces→hyphens, strip `.md`). A bare `[[transformers]]` resolves directly; any legacy folder-qualified `[[concepts/transformers]]` resolves to the same basename `transformers`.
 - Skip links that point outside the node list (broken links)
 - Each resolved link becomes an edge: `{source: page_id, target: linked_id, relation: "wikilink", confidence: "EXTRACTED"}`
 - If the linking sentence ends with `^[inferred]` or `^[ambiguous]`, override `confidence` accordingly
@@ -84,9 +84,9 @@ NetworkX node_link format — standard for graph tools and scripts:
   },
   "nodes": [
     {
-      "id": "concepts/transformers",
+      "id": "transformers",
       "label": "Transformer Architecture",
-      "category": "concepts",
+      "category": "concept",
       "tags": ["ml", "architecture"],
       "summary": "The attention-based architecture introduced in Attention Is All You Need.",
       "community": 0
@@ -94,8 +94,8 @@ NetworkX node_link format — standard for graph tools and scripts:
   ],
   "links": [
     {
-      "source": "concepts/transformers",
-      "target": "entities/vaswani",
+      "source": "transformers",
+      "target": "vaswani",
       "relation": "wikilink",
       "confidence": "EXTRACTED"
     }
@@ -119,13 +119,13 @@ GraphML XML format — loadable in Gephi, yEd, and Cytoscape:
   <key id="relation" for="edge" attr.name="relation" attr.type="string"/>
   <key id="confidence" for="edge" attr.name="confidence" attr.type="string"/>
   <graph id="wiki" edgedefault="undirected">
-    <node id="concepts/transformers">
+    <node id="transformers">
       <data key="label">Transformer Architecture</data>
-      <data key="category">concepts</data>
+      <data key="category">concept</data>
       <data key="tags">ml, architecture</data>
       <data key="community">0</data>
     </node>
-    <edge source="concepts/transformers" target="entities/vaswani">
+    <edge source="transformers" target="vaswani">
       <data key="relation">wikilink</data>
       <data key="confidence">EXTRACTED</data>
     </edge>
@@ -146,11 +146,11 @@ Neo4j Cypher `MERGE` statements — paste into Neo4j Browser or run with `cypher
 // Load with: cypher-shell -u neo4j -p password < cypher.txt
 
 // Nodes
-MERGE (n:Page {id: "concepts/transformers"}) SET n.label = "Transformer Architecture", n.category = "concepts", n.tags = ["ml","architecture"], n.community = 0;
-MERGE (n:Page {id: "entities/vaswani"}) SET n.label = "Ashish Vaswani", n.category = "entities", n.tags = ["person","ml"], n.community = 0;
+MERGE (n:Page {id: "transformers"}) SET n.label = "Transformer Architecture", n.category = "concept", n.tags = ["ml","architecture"], n.community = 0;
+MERGE (n:Page {id: "vaswani"}) SET n.label = "Ashish Vaswani", n.category = "entity", n.tags = ["person","ml"], n.community = 0;
 
 // Relationships
-MATCH (a:Page {id: "concepts/transformers"}), (b:Page {id: "entities/vaswani"}) MERGE (a)-[:WIKILINK {relation: "wikilink", confidence: "EXTRACTED"}]->(b);
+MATCH (a:Page {id: "transformers"}), (b:Page {id: "vaswani"}) MERGE (a)-[:WIKILINK {relation: "wikilink", confidence: "EXTRACTED"}]->(b);
 ```
 
 Write one `MERGE` node statement per page, then one `MATCH`/`MERGE` relationship statement per edge.
@@ -165,7 +165,7 @@ Build the HTML file by:
 
 1. Generating a JSON array of node objects for vis.js:
 ```js
-{id: "concepts/transformers", label: "Transformer Architecture", color: {background: "#4E79A7"}, size: <degree * 3 + 8>, title: "concepts | #ml #architecture", community: 0}
+{id: "transformers", label: "Transformer Architecture", color: {background: "#4E79A7"}, size: <degree * 3 + 8>, title: "concept | #ml #architecture", community: 0}
 ```
 - Color by community (cycle through: `#4E79A7`, `#F28E2B`, `#E15759`, `#76B7B2`, `#59A14F`, `#EDC948`, `#B07AA1`, `#FF9DA7`, `#9C755F`, `#BAB0AC`)
 - Size by degree (incoming + outgoing link count): `size = degree * 3 + 8`, capped at 60
@@ -173,7 +173,7 @@ Build the HTML file by:
 
 2. Generating a JSON array of edge objects for vis.js:
 ```js
-{from: "concepts/transformers", to: "entities/vaswani", dashes: false, width: 1, color: {color: "#666", opacity: 0.6}}
+{from: "transformers", to: "vaswani", dashes: false, width: 1, color: {color: "#666", opacity: 0.6}}
 ```
 - `dashes: true` for INFERRED edges
 - `dashes: [4,8]` for AMBIGUOUS edges

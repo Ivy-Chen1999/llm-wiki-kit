@@ -16,8 +16,8 @@ You are answering questions against a compiled Obsidian wiki, not raw source doc
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
-2. If `$OBSIDIAN_VAULT_PATH/hot.md` exists, read it first — it gives you instant context on recent activity. If the user's question is about something ingested recently, hot.md may answer it before you even open `index.md`.
-3. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand the wiki's scope and structure
+2. If `$OBSIDIAN_VAULT_PATH/_system/hot.md` exists, read it first — it gives you instant context on recent activity. If the user's question is about something ingested recently, hot.md may answer it before you even open `_system/index.md`.
+3. Read `$OBSIDIAN_VAULT_PATH/_system/index.md` to understand the wiki's scope and structure
 
 ## Visibility Filter (optional)
 
@@ -47,7 +47,7 @@ Classify the query type:
 - **Gap query** — "What don't I know about X?" → Find what's missing, check open questions sections
 
 Also decide the **mode**:
-- **Index-only mode** — triggered by "quick answer", "just scan", "don't read the pages", "fast lookup". Stops at Step 3. Answers from frontmatter + `index.md` only.
+- **Index-only mode** — triggered by "quick answer", "just scan", "don't read the pages", "fast lookup". Stops at Step 3. Answers from frontmatter + `_system/index.md` only.
 - **Normal mode** — the full tiered pipeline below.
 
 ## Retrieval Strategy
@@ -155,8 +155,8 @@ updated: [today]
 
 ## Source Pages
 
-- [[notes/page-a]]
-- [[notes/page-b]]
+- [[page-a]]
+- [[page-b]]
 
 ## How To Apply
 
@@ -168,18 +168,18 @@ updated: [today]
 
 ## Related
 
-- [[notes/page-a]]
-- [[notes/page-b]]
+- [[page-a]]
+- [[page-b]]
 ```
 
 3. Update `_system/index.md` and `_system/hot.md` per your wiki's index-maintenance rules
-4. Tell the user: "Saved as [[notes/slug]]"
+4. Tell the user: "Saved as [[slug]]"
 
 If the user says no — drop it completely. No todo, no mention again.
 
 ### Step 7: Log the Query
 
-Append to `log.md`:
+Append to `_system/log.md`:
 ```
 - [TIMESTAMP] QUERY query="the user's question" result_pages=N mode=normal|index_only|filtered escalated=true|false insight_offered=true|false insight_saved=true|false
 ```

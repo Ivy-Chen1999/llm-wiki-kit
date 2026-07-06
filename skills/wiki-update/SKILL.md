@@ -20,7 +20,7 @@ You are distilling knowledge from the current project into the user's Obsidian w
    - `OBSIDIAN_WIKI_REPO` — where the obsidian-wiki repo is cloned (for reading other skills if needed)
 2. If `~/.obsidian-wiki/config` doesn't exist, tell the user to run `bash setup.sh` from their obsidian-wiki repo first.
 3. Read `$OBSIDIAN_VAULT_PATH/.manifest.json` to check if this project has been synced before.
-4. Read `$OBSIDIAN_VAULT_PATH/index.md` to know what the wiki already contains.
+4. Read `$OBSIDIAN_VAULT_PATH/_system/index.md` to know what the wiki already contains.
 
 ## Step 1: Understand the Project
 
@@ -68,33 +68,26 @@ The heuristic: **if reading the codebase answers the question, don't wiki it. If
 
 ## Step 4: Distill into Wiki Pages
 
-### Project-specific knowledge
+Every note lives flat in `notes/`. A note's type is its frontmatter `category:` field, not its location — there are no per-project or per-category subfolders. Convey a note's project association with a tag and by linking it to the project's overview page.
 
-Goes under `$VAULT/projects/<project-name>/`:
+### The project overview note
 
-```
-projects/<project-name>/
-├── <project-name>.md          ← project overview (named after the project, NOT _project.md)
-├── concepts/                  ← project-specific ideas, architectures
-├── skills/                    ← project-specific how-tos, patterns
-└── references/                ← project-specific source summaries
-```
-
-The overview page (`<project-name>.md`) should have:
+Create `notes/<project-name>.md` — the anchor you'd read to get oriented. Name it after the project (never `_project.md`, since Obsidian uses filenames as graph node labels). Give it `category: entity`, since the project is a thing the other notes refer to. It should have:
 - What the project is (one paragraph)
 - Key concepts and how they connect
-- Links to project-specific and global wiki pages
+- Links to the project's other notes and to relevant existing notes
 
-### Global knowledge
+### Everything else
 
-Things that aren't project-specific go in the global categories:
+For each thing you distilled, create or update a note in `notes/` and set its `category:` to match what it is:
 
-| What you found | Where it goes |
+| What you found | `category:` |
 |---|---|
-| A general concept learned | `concepts/` |
-| A reusable pattern or technique | `skills/` |
-| A tool/service/person | `entities/` |
-| Cross-project analysis | `synthesis/` |
+| A concept, architecture, or reusable pattern/technique (project-specific or general) | `concept` |
+| A tool, service, or person | `entity` |
+| A summarized external source | `reference` |
+| Cross-project or cross-cutting analysis | `synthesis` |
+| Your own take or opinion | `insight` |
 
 ### Page format
 
@@ -104,9 +97,9 @@ Every page needs YAML frontmatter:
 ---
 title: >-
     Page Title
-category: concepts
+category: concept
 tags: [tag1, tag2]
-sources: [projects/<project-name>]
+sources: [<project-name>]
 summary: >-
     One or two sentences (≤200 chars) describing what this page covers.
 provenance:
@@ -165,32 +158,32 @@ Add or update this project's entry:
       "source_cwd": "/absolute/path/to/project",
       "last_synced": "TIMESTAMP",
       "last_commit_synced": "abc123f",
-      "pages_in_vault": ["projects/<project-name>/<project-name>.md", "..."]
+      "pages_in_vault": ["notes/<project-name>.md", "..."]
     }
   }
 }
 ```
 
-### Update `index.md`
+### Update `_system/index.md`
 
 Add entries for any new pages created.
 
-### Update `log.md`
+### Update `_system/log.md`
 
 Append:
 ```
 - [TIMESTAMP] WIKI_UPDATE project=<project-name> pages_updated=X pages_created=Y source_cwd=/path/to/project
 ```
 
-### Update `hot.md`
+### Update `_system/hot.md`
 
-Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Rewrite **Recent Activity** with what was just synced — last 3 operations max. Update **Active Threads** if this project is an ongoing focus. Update **Key Takeaways** with the most important architectural insight or decision surfaced during this sync. Update `updated` timestamp.
+Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Rewrite **Recent Activity** with what was just synced — last 3 operations max. Update **Active Threads** if this project is an ongoing focus. Update **Key Takeaways** with the most important architectural insight or decision surfaced during this sync. Update `updated` timestamp.
 
 Write conceptually: "Synced obsidian-wiki — added wiki-capture and wiki-research skills, core new capabilities are autonomous web research and conversation capture."
 
 ## Tips
 
-- **Be aggressive about merging.** If the project uses React Server Components, don't create a new page if `concepts/react-server-components.md` already exists. Update the existing one and add this project as a source.
-- **Consult the tag taxonomy.** Read `$VAULT/_meta/taxonomy.md` if it exists, and use canonical tags.
+- **Be aggressive about merging.** If the project uses React Server Components, don't create a new page if `notes/react-server-components.md` already exists. Update the existing one and add this project as a source.
+- **Consult the tag whitelist.** Read `$VAULT/_system/tags.md` if it exists, and use canonical tags.
 - **Don't copy code.** Distill the *knowledge*, not the implementation. "This project uses a debounced search pattern with 300ms delay" is useful. Pasting the actual debounce function is not.
 - **Project overview is the anchor.** The `<project-name>.md` file is what you'd read to get oriented. Make it good.

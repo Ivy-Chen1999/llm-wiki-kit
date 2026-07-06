@@ -30,21 +30,21 @@ $OBSIDIAN_VAULT_PATH/
 ├── _archives/
 │   ├── 2026-04-01T10-30-00Z/
 │   │   ├── archive-meta.json
-│   │   ├── concepts/
-│   │   ├── entities/
-│   │   ├── skills/
-│   │   ├── references/
-│   │   ├── synthesis/
+│   │   ├── notes/            ← all notes, flat (category lives in frontmatter)
 │   │   ├── journal/
-│   │   ├── projects/
-│   │   ├── index.md
-│   │   ├── log.md
+│   │   ├── _system/
+│   │   │   ├── index.md
+│   │   │   ├── hot.md
+│   │   │   └── log.md
 │   │   └── .manifest.json
 │   └── 2026-03-15T08-00-00Z/
 │       └── ...
-├── concepts/          ← live wiki
-├── entities/
-└── ...
+├── notes/             ← live wiki (all notes, flat)
+├── journal/
+└── _system/           ← bookkeeping
+    ├── index.md
+    ├── hot.md
+    └── log.md
 ```
 
 ### archive-meta.json
@@ -55,11 +55,12 @@ $OBSIDIAN_VAULT_PATH/
   "reason": "rebuild",
   "total_pages": 87,
   "total_sources": 42,
-  "total_projects": 6,
   "vault_path": "<your vault path>",
   "manifest_snapshot": ".manifest.json"
 }
 ```
+
+`total_sources` counts `category: reference` notes (summarized external sources).
 
 ## Mode 1: Archive Only
 
@@ -68,9 +69,9 @@ When the user wants to snapshot the current state without rebuilding.
 ### Steps:
 
 1. Create archive directory: `_archives/YYYY-MM-DDTHH-MM-SSZ/`
-2. Copy all category directories, `index.md`, `log.md`, `.manifest.json`, and `projects/` into the archive
+2. Copy `notes/`, `journal/`, the `_system/` bookkeeping files (`index.md`, `hot.md`, `log.md`), and `.manifest.json` into the archive
 3. Write `archive-meta.json` with reason `"snapshot"`
-4. Append to `log.md`:
+4. Append to `_system/log.md`:
    ```
    - [TIMESTAMP] ARCHIVE reason="snapshot" pages=87 destination="_archives/2026-04-06T10-30-00Z"
    ```
@@ -86,12 +87,12 @@ Same as Mode 1 above, but with reason `"rebuild"`.
 
 ### Step 2: Clear live wiki
 
-Remove all content from the category directories (`concepts/`, `entities/`, `skills/`, etc.) and the `projects/` directory. Keep:
+Delete every note in `notes/`, leaving the folder empty. Keep:
 - `_archives/` (obviously)
 - `.obsidian/` (Obsidian config)
 - `.env` (if present in vault)
 
-Reset `index.md` to the empty template. Reset `log.md` with just the rebuild entry. Delete `.manifest.json` (it'll be recreated during ingest).
+Reset `_system/index.md` to the empty template. Reset `_system/hot.md`. Reset `_system/log.md` with just the rebuild entry. Delete `.manifest.json` (it'll be recreated during ingest).
 
 ### Step 3: Rebuild
 
@@ -103,13 +104,17 @@ Tell the user the vault is cleared and ready for a full re-ingest. They can now 
 4. `wiki-ingest` — to reprocess documents
 5. `data-ingest` — to reprocess any other data
 
-Each of these will rebuild the manifest as they go.
+Each of these will rebuild the manifest and drop notes into `notes/` as they go.
 
 **Important:** Don't run the ingest yourself automatically. The user should choose what to re-ingest and in what order. Some sources may no longer be relevant.
 
-### Step 4: Log the rebuild
+### Step 4: Rebuild the index from the notes
 
-Append to `log.md`:
+The index and hot list are derived data — reconstruct them from `notes/` rather than hand-maintaining them. Scan every `notes/*.md`, read each note's frontmatter `category:` field, and regenerate `_system/index.md` with the notes grouped under their category (concept, entity, reference, insight, synthesis). Refresh `_system/hot.md` from the most recently updated notes. Run this after re-ingest, and any other time the index has drifted from what's actually in `notes/`.
+
+### Step 5: Log the rebuild
+
+Append to `_system/log.md`:
 ```
 - [TIMESTAMP] REBUILD archived_to="_archives/2026-04-06T10-30-00Z" previous_pages=87
 ```
@@ -142,9 +147,9 @@ Before restoring, archive the current state (reason: `"pre-restore"`) so nothing
 ### Step 4: Restore
 
 1. Clear the live wiki (same as Mode 2, Step 2)
-2. Copy all content from the chosen archive back into the live wiki directories
-3. Restore `index.md`, `log.md`, and `.manifest.json` from the archive
-4. Append to `log.md`:
+2. Copy `notes/` and `journal/` from the chosen archive back into the live wiki
+3. Restore `_system/index.md`, `_system/hot.md`, `_system/log.md`, and `.manifest.json` from the archive
+4. Append to `_system/log.md`:
    ```
    - [TIMESTAMP] RESTORE from="_archives/2026-03-15T08-00-00Z" pages_restored=65
    ```

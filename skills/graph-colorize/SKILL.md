@@ -5,16 +5,16 @@ description: >
   Use this skill when the user says "color my graph", "color code obsidian", "colorize
   the graph", "color the graph by tag", "color by category", "highlight visibility
   in graph", "make the graph colorful", "distinguish tags in graph", or wants nodes
-  in Obsidian's graph view tinted by tag, folder, or visibility. Generates a
+  in Obsidian's graph view tinted by tag, category, or visibility. Generates a
   `colorGroups` array from the vault's actual tags/categories and merges it into the
   existing graph.json without clobbering other graph settings. Always backs up first.
 ---
 
 # Graph Colorize — Color-code the Obsidian Graph View
 
-You are rewriting `$OBSIDIAN_VAULT_PATH/.obsidian/graph.json` so Obsidian's graph view tints nodes by tag, folder, or visibility.
+You are rewriting `$OBSIDIAN_VAULT_PATH/.obsidian/graph.json` so Obsidian's graph view tints nodes by tag, category, or visibility.
 
-Obsidian stores graph settings in `<vault>/.obsidian/graph.json`. The `colorGroups` array is a list of `{query, color}` pairs; the first matching query wins per node. Queries use Obsidian's search syntax: `tag:#foo`, `path:"concepts"`, `file:foo`, and frontmatter property search `["category":"concept"]` (for flat vaults), etc. Color is `{"a": 1, "rgb": <packed-int>}` where the int is `(R << 16) | (G << 8) | B`.
+Obsidian stores graph settings in `<vault>/.obsidian/graph.json`. The `colorGroups` array is a list of `{query, color}` pairs; the first matching query wins per node. Queries use Obsidian's search syntax: `tag:#foo`, `file:foo`, and frontmatter property search `["category":"concept"]`, etc. Color is `{"a": 1, "rgb": <packed-int>}` where the int is `(R << 16) | (G << 8) | B`.
 
 ## Before You Start
 
@@ -34,7 +34,7 @@ Infer the mode from the user's phrasing. If ambiguous, default to **by-tag**.
 | User intent | Mode |
 |---|---|
 | "color by tag", "color my graph", "make it colorful" (default) | `by-tag` |
-| "color by folder", "color by category", "color by directory" | `by-category` |
+| "color by category", "color by type" | `by-category` |
 | "highlight visibility", "show internal/pii in graph", "visibility colors" | `by-visibility` |
 | User provides explicit mapping (`tag:#foo = red`, or JSON blob) | `custom` |
 | "combine tag and visibility" / "both" | `combined` (visibility first, then tag) |
@@ -62,7 +62,7 @@ Every color is wrapped as `{"a": 1, "rgb": <int>}`.
 
 ### Mode: `by-tag`
 
-1. Glob `$VAULT_PATH/**/*.md` excluding `_archives/`, `_raw/`, `.obsidian/`, `node_modules/`, `index.md`, `log.md`, `_insights.md`.
+1. Glob `$VAULT_PATH/**/*.md` excluding `_system/`, `_archives/`, `_visual/`, `raw/`, `.obsidian/`, `node_modules/` (this skips the bookkeeping files `_system/index.md`, `_system/hot.md`, `_system/log.md`, `_system/tags.md` too).
 2. Parse frontmatter `tags` from each page. Count usage per tag.
 3. **Drop `visibility/*` tags** from the frequency list — they are reserved system tags, handled only in `by-visibility` or `combined` mode.
 4. Take the top 10 tags by usage. If there are fewer than 10 unique tags, use all of them.
@@ -71,36 +71,9 @@ Every color is wrapped as `{"a": 1, "rgb": <int>}`.
 
 ### Mode: `by-category`
 
-**First detect the vault layout** — this decides which query type to emit:
+Every note lives flat in `notes/` and declares its type in the YAML frontmatter `category:` field — there are no per-type folders, so the color comes from that frontmatter value, never from a folder path.
 
-- **Folder layout**: categories are top-level folders (`concepts/`, `entities/`, …). Detect by checking whether those folders exist and hold `.md` files.
-- **Flat layout**: all notes live in one `notes/` folder and the category is in frontmatter (`category: concept`). Detect by checking that notes carry a `category:` frontmatter key. (The vault-template shipped with this kit is flat.)
-
-If both signals appear, prefer **flat** when most notes sit in a single folder; otherwise use folder.
-
-#### Folder layout → `path:` queries
-
-Use these top-level folders in this fixed order so colors are stable across runs:
-
-| Folder | Color index |
-|---|---|
-| `concepts` | 0 (blue) |
-| `entities` | 1 (orange) |
-| `skills` | 2 (red) |
-| `references` | 3 (teal) |
-| `synthesis` | 4 (green) |
-| `projects` | 5 (yellow) |
-| `journal` | 6 (purple) |
-
-Emit one entry per folder that exists AND contains at least one `.md` file:
-
-```json
-{"query": "path:\"<folder>\"", "color": {"a": 1, "rgb": <int>}}
-```
-
-#### Flat layout → frontmatter property queries
-
-Scan the actual `category:` values in `notes/**/*.md` (e.g. `grep -rh "^category:" notes/ | sort | uniq -c`). Map each value to a color using this fixed order so colors stay stable across runs:
+Scan the actual `category:` values across the vault's notes (e.g. `grep -rh "^category:" notes/ | sort | uniq -c`). Map each value to a color using this fixed order so colors stay stable across runs:
 
 | `category` value | Color index |
 |---|---|
@@ -111,7 +84,7 @@ Scan the actual `category:` values in `notes/**/*.md` (e.g. `grep -rh "^category
 | `synthesis` | 5 (yellow) |
 | `event` | 6 (purple) |
 
-For any category value not in this table, assign the next unused palette color. Emit one entry per category value that actually occurs, using Obsidian's **property search** syntax (note the escaped quotes inside the JSON string):
+For any category value not in this table, assign the next unused palette color. Emit one entry per category value that actually occurs, using Obsidian's **property search** syntax to match the frontmatter field (note the escaped quotes inside the JSON string):
 
 ```json
 {"query": "[\"category\":\"concept\"]", "color": {"a": 1, "rgb": 5142951}}
@@ -192,7 +165,7 @@ This write was made with Obsidian fully quit, so it will persist. Editing graph.
 while Obsidian is running gets overwritten — always quit first.
 ```
 
-Append to `$VAULT_PATH/log.md`:
+Append to `$VAULT_PATH/_system/log.md`:
 
 ```
 - [TIMESTAMP] GRAPH_COLORIZE mode=<mode> groups=<N> backup=graph.json.backup-<stamp>
@@ -201,12 +174,12 @@ Append to `$VAULT_PATH/log.md`:
 ## Edge Cases
 
 - **No tags in vault** in `by-tag` mode → fall back to `by-category` and tell the user.
-- **User wants to undo** → restore from the latest `graph.json.backup-*` and note that in `log.md`.
+- **User wants to undo** → restore from the latest `graph.json.backup-*` and note that in `_system/log.md`.
 - **User wants to clear all color groups** → set `colorGroups: []`, back up, log as `GRAPH_COLORIZE mode=clear`.
 - **`.obsidian/` missing** → the vault hasn't been opened in Obsidian yet. Tell the user to open it once, then re-run. Don't create `.obsidian/` yourself — Obsidian populates many files there on first open.
 - **Query syntax gotchas**: folder paths with spaces need quoting (`path:"my folder"`); tags with nested slashes work literally (`tag:#visibility/internal`); don't URL-encode.
 - **Obsidian open during edit** (most common failure): Obsidian rewrites graph.json from memory on close *and periodically while running*, so writes made while it is open are clobbered within seconds — Cmd/Ctrl+R does not reliably help. Always have the user **fully quit** (`Cmd+Q`) first, verify with `pgrep -x Obsidian`, then write, then re-open. See "Before You Start" step 3.
-- **Groups show in panel but nodes stay gray** (flat-layout vaults): the Obsidian version is too old for `["category":...]` property search. Fall back to `by-tag`, or add `category/<value>` nested tags and color by `tag:`.
+- **Groups show in panel but nodes stay gray** (`by-category` mode): the Obsidian version is too old for `["category":...]` property search. Fall back to `by-tag`, or add `category/<value>` nested tags and color by `tag:`.
 - **New category value appears later**: a category not in the mapping gets no entry and its nodes stay default gray — re-run to pick it up.
 
 ## Notes

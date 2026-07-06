@@ -45,15 +45,23 @@ say "llm-wiki-kit installer"
 command -v git >/dev/null 2>&1 || warn "git not found — you'll need it to update the kit later."
 
 # --- 2. link skills ---
+# Non-destructive: we only ADD symlinks into $SKILLS_DIR and never touch anything
+# already there (your existing skills, settings.json, CLAUDE.md, plugins are left
+# completely alone). A name that already exists is skipped and reported, so a
+# same-named skill of yours always wins.
 say "Step 1/4 — linking skills into $SKILLS_DIR"
 mkdir -p "$SKILLS_DIR"
-linked=0; skipped=0
+linked=0; skipped_names=""
 for dir in "$SKILLS_SRC"/*/; do
   name="$(basename "$dir")"; dest="$SKILLS_DIR/$name"
-  if [ -e "$dest" ] || [ -L "$dest" ]; then skipped=$((skipped+1)); continue; fi
+  if [ -e "$dest" ] || [ -L "$dest" ]; then skipped_names="$skipped_names $name"; continue; fi
   ln -s "$dir" "$dest"; linked=$((linked+1))
 done
-ok "$linked skills linked, $skipped already present"
+ok "$linked skills linked (as symlinks — keep this repo where it is; deleting it breaks them)"
+if [ -n "$skipped_names" ]; then
+  warn "left these untouched (a skill with the same name already exists):$skipped_names"
+  warn "if you want the kit's version, remove yours from $SKILLS_DIR and re-run — otherwise ignore this."
+fi
 
 # --- 3. choose / create the vault ---
 say "Step 2/4 — your wiki vault"
