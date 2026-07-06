@@ -13,6 +13,8 @@ description: >
 
 You are ingesting arbitrary text data into an Obsidian wiki. The source could be anything — conversation exports, log files, transcripts, data dumps. Your job is to figure out the format, extract knowledge, and distill it into wiki pages.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).

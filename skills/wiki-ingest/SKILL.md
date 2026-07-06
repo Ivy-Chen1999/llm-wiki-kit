@@ -13,6 +13,8 @@ description: >
 
 You are ingesting source documents into an Obsidian wiki. Your job is not to summarize — it is to **distill and integrate** knowledge across the entire wiki.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Also read `OBSIDIAN_SOURCES_DIR` from the same source. Only read the specific variables you need — do not log, echo, or reference any other values.
@@ -247,6 +249,7 @@ After ingesting, verify:
 - [ ] `index.md` reflects all changes
 - [ ] `log.md` has the ingest entry
 - [ ] Source attribution is present for every new claim
+- [ ] Applied the **wiki-sourcing** gate to every falsifiable claim (fetched source + `(as of …)`, else `[unverified]`/hedge)
 - [ ] Inferred and ambiguous claims are marked with `^[inferred]` / `^[ambiguous]`; `provenance:` frontmatter block is present on new and updated pages
 - [ ] Every new/updated page has a `summary:` frontmatter field (1–2 sentences, ≤200 chars)
 

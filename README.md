@@ -16,7 +16,7 @@ There are three layers:
 
 ```
 llm-wiki-kit/
-├── skills/          20 agent skills
+├── skills/          22 agent skills
 ├── vault-template/  an empty vault you can copy and start using
 ├── .env.example     config (vault path, sources, search)
 ├── install.sh       links the skills into your agent's skills directory
@@ -29,6 +29,7 @@ llm-wiki-kit/
 | Skill | What it does |
 |-------|--------------|
 | `llm-wiki` | Explains the pattern and retrieval approach. Start here. |
+| `wiki-sourcing` | The sourcing/verification doctrine — when a claim needs a fetched source, when to hedge, when to refuse. Applied by every write skill. |
 | `wiki-setup` | Initializes a new vault (structure, system files, config). |
 | `wiki-ingest` | Turns a raw source into wiki notes. |
 | `ingest-url` | Fetches a URL and ingests it. |
@@ -44,6 +45,7 @@ llm-wiki-kit/
 | `wiki-lint` | Checks for orphans, broken links, contradictions, stale notes. |
 | `wiki-status` | Reports what's new and what's ready to ingest. |
 | `wiki-dashboard` | Generates a vault overview. |
+| `wiki-visual` | Turns a note into a self-contained, shareable HTML one-pager (diagram or card). |
 | `wiki-rebuild` | Rebuilds the index and cache from the notes. |
 | `wiki-export` | Exports the wiki to other formats. |
 | `wiki-capture` | Drops rough notes into the staging area. |
@@ -125,7 +127,7 @@ If you prefer one folder per category, `wiki-setup` can generate that layout ins
 
 ## Make it your own
 
-The 20 skills above are the shared core. The skills that pay off most are usually personal — shaped around how *you* work. You're encouraged to add your own:
+The 22 skills above are the shared core. The skills that pay off most are usually personal — shaped around how *you* work. You're encouraged to add your own:
 
 - a **retro** skill that writes a project post-mortem into the vault,
 - a **digest** skill that pulls your todos + field news into a dated entry,

@@ -11,6 +11,8 @@ description: >
 
 You are running an autonomous research loop on a topic, synthesizing what you find, and filing the results into the Obsidian wiki as permanent knowledge.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Set `VAULT` to that `OBSIDIAN_VAULT_PATH`.
@@ -199,4 +201,5 @@ Check `index.md` for existing pages on the same topics — merge into existing p
 - [ ] Concept and entity pages written for significant items
 - [ ] Contradictions flagged in synthesis page
 - [ ] All pages cross-linked
+- [ ] Applied the **wiki-sourcing** gate to every falsifiable claim (fetched source + `(as of …)`, else `[unverified]`/hedge)
 - [ ] `index.md`, `log.md`, `hot.md`, `.manifest.json` updated
