@@ -9,10 +9,13 @@ comparison in the LangSmith UI.
 
 What you need to actually run it (this repo ships no keys):
   pip install langsmith
-  export LANGSMITH_API_KEY=...          # your LangSmith key
-  export ANTHROPIC_API_KEY=...          # for the agent-under-test (Claude Code headless)
-  ./install.sh                          # so the skills are loaded from ~/.claude/skills
+  export LANGSMITH_API_KEY=...          # ONLY this — to upload the dataset + scores
   python evals/langsmith_eval.py
+
+No ANTHROPIC_API_KEY required: the agent-under-test is your local, already-logged-in
+Claude Code (run_case.sh drives `claude -p`, which uses your interactive auth). run_case.sh
+is self-contained (it loads the kit's skills project-scoped), so no install step is needed.
+LANGSMITH_API_KEY is only for pushing the experiment/scores to the LangSmith UI.
 
 Design notes
 ------------
@@ -59,7 +62,8 @@ def main() -> None:
     except ImportError:
         sys.exit("pip install langsmith first (see module docstring for the full setup).")
     if not os.getenv("LANGSMITH_API_KEY"):
-        sys.exit("set LANGSMITH_API_KEY (and ANTHROPIC_API_KEY for the agent).")
+        sys.exit("set LANGSMITH_API_KEY (the agent-under-test uses your local Claude Code login — "
+                 "no ANTHROPIC_API_KEY needed).")
 
     client = Client()
     ds_name = "llm-wiki-kit-behavioral"

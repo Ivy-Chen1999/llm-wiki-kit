@@ -22,7 +22,10 @@ Cases live in [`cases.jsonl`](cases.jsonl); each case's setup is an overlay dir 
 
 ## Run it
 
-Skills must be installed first (`./install.sh`), so the agent-under-test loads them.
+**No API key needed.** The agent-under-test is your local, already-logged-in Claude Code
+(`run_case.sh` drives `claude -p`, using the same auth as your interactive sessions). It's also
+self-contained — it loads the kit's skills project-scoped into each throwaway vault, so you don't
+need to run `install.sh` first. Just have Claude Code installed and logged in.
 
 ```bash
 # one case, end-to-end (sets up an isolated vault, runs `claude -p`, scores it)

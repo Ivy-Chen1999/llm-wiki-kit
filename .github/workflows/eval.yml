@@ -1,48 +1,41 @@
 name: eval
 
-# Behavioral evals — runs the agent-under-test against the skills and asserts on
-# the files it produces. Costs tokens + needs a key, so it's MANUAL (workflow_dispatch)
-# and no-ops unless the ANTHROPIC_API_KEY secret is set.
+# Behavioral evals — runs the agent-under-test against the skills and asserts on the
+# files it produces. Costs tokens, so it's MANUAL (workflow_dispatch).
 #
-# Setup: repo Settings → Secrets → Actions → add ANTHROPIC_API_KEY.
-# Then: Actions tab → "eval" → Run workflow.
+# Two ways to give the runner auth (pick one):
+#   A) KEYLESS, recommended — a SELF-HOSTED runner where you've already run Claude Code
+#      and logged in (`claude login`). The eval then uses that local session, exactly like
+#      running evals/run_all.sh on your laptop. No secret needed.
+#        -> set `runs-on: [self-hosted]` below.
+#   B) HOSTED — GitHub's ubuntu runner + an ANTHROPIC_API_KEY secret
+#      (repo Settings → Secrets → Actions). Fresh runners can't reuse your local login,
+#      so this path needs the key.
 on:
   workflow_dispatch:
 
 jobs:
   behavioral:
+    # For the keyless path, change this to: [self-hosted]
     runs-on: ubuntu-latest
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Guard — need a key
+      - name: Ensure Claude Code is available
         run: |
-          if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
-            echo "ANTHROPIC_API_KEY not set — skipping behavioral eval."
-            echo "Add it in repo Settings → Secrets to enable this workflow."
-            exit 0
+          command -v claude >/dev/null 2>&1 || npm i -g @anthropic-ai/claude-code
+          claude --version || true
+
+      - name: Auth check
+        run: |
+          # Keyless self-hosted runners are already logged in. Hosted runners need the key.
+          if ! claude -p "reply OK" --dangerously-skip-permissions >/dev/null 2>&1; then
+            echo "Claude Code is not authenticated on this runner."
+            echo "Use a self-hosted runner that has run 'claude login', OR set the ANTHROPIC_API_KEY secret."
+            exit 1
           fi
 
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-
-      - name: Install the agent-under-test + link skills
-        if: env.ANTHROPIC_API_KEY != ''
-        run: |
-          npm i -g @anthropic-ai/claude-code
-          # link skills without the interactive vault/qmd steps
-          ./install.sh --skills-dir "$HOME/.claude/skills" <<< $'\n\nN\n' || true
-
-      - name: Run behavioral eval cases
-        if: env.ANTHROPIC_API_KEY != ''
-        run: |
-          # NOTE: headless claude may need a permission flag depending on CLI version,
-          # e.g. `claude -p --dangerously-skip-permissions`. Adjust run_case.sh if the
-          # agent step no-ops. assert_case.sh returns non-zero on any failed assertion.
-          rc=0
-          for c in source1 source2 source3 flat1; do
-            bash evals/run_case.sh "$c" || rc=1
-          done
-          exit $rc
+      - name: Run behavioral eval cases (x3, pass-rate)
+        run: evals/run_all.sh 3

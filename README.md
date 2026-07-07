@@ -146,8 +146,9 @@ The 22 skills above are the shared core. The skills that pay off most are usuall
 - `bash scripts/check.sh` — deterministic hygiene gate (frontmatter, no personal info, flat-model
   invariants, README/skills parity). Runs in CI on every push/PR.
 - `evals/` — behavioral evals: give a cold agent a task + the skills, then assert on the files it
-  produces. `evals/run_all.sh 3` runs every case ×3 and reports a pass-rate. See
-  [`evals/README.md`](evals/README.md) (includes a LangSmith adapter).
+  produces. `evals/run_all.sh 3` runs every case ×3 and reports a pass-rate. **No API key** — it
+  drives your logged-in Claude Code (`claude -p`) and loads the skills project-scoped, so it's
+  self-contained. See [`evals/README.md`](evals/README.md) (includes a LangSmith adapter).
 - Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits

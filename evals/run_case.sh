@@ -3,18 +3,24 @@
 #
 #   usage: ./run_case.sh <case-id> [--manual]
 #
-# Default: drives the Claude Code CLI headlessly (`claude -p`) as the agent-under-test.
-# --manual: prepare the vault + print the task, so you can run ANY skill-loading agent by hand
-#           (or wire your own runner / LangSmith target — see langsmith_eval.py).
+# NO API KEY NEEDED. By default it drives your LOCAL, already-logged-in Claude Code
+# (`claude -p`) — the same auth you use interactively. There is no ANTHROPIC_API_KEY
+# requirement; if you happen to have one set, the CLI will use it, but it's optional.
+#
+# The kit's skills are made available to the run PROJECT-SCOPED (symlinked into the temp
+# vault's .claude/skills), so the eval is self-contained — you don't even need to run
+# install.sh first, and it won't depend on your global setup. (Note: skills you already
+# have installed globally still load too and could, in principle, also match the task.)
+#
+# --manual: prepare the vault + print the task, so you can run ANY skill-loading agent by
+#           hand (or wire your own runner / LangSmith target — see langsmith_eval.py).
 #
 # The agent gets ONLY the task + the skills; never the pass criteria (no teaching to the test).
-# Per-case setup is an overlay dir: fixtures/<case>/ is copied on top of the starter vault.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/.." && pwd)"
 CASE="${1:?case id (source1|source2|source3|flat1|query1|dedup1|inject1)}"; MODE="${2:-auto}"
 
-# task per case (setup is the fixtures/<case>/ overlay)
 case "$CASE" in
   source1) instr="ingest raw/nimbus.md into my wiki" ;;
   source2) instr="ingest raw/weekly-digest.md into my wiki" ;;
@@ -29,6 +35,10 @@ esac
 base="$(mktemp -d)"; work="$base/vault"
 cp -R "$REPO/vault-template" "$work"
 [ -d "$REPO/evals/fixtures/$CASE" ] && cp -R "$REPO/evals/fixtures/$CASE/." "$work/"
+# make the kit's skills available project-scoped (self-contained; no global install needed)
+mkdir -p "$work/.claude/skills"
+for d in "$REPO"/skills/*/; do ln -s "$d" "$work/.claude/skills/$(basename "$d")"; done
+
 export OBSIDIAN_VAULT_PATH="$work"
 export AGENT_OUTPUT="$base/agent_output.txt"   # assert_case.sh reads this for answer-based cases
 echo "vault: $work"
@@ -42,11 +52,12 @@ if [ "$MODE" = "--manual" ]; then
 fi
 
 if ! command -v claude >/dev/null 2>&1; then
-  echo "!! 'claude' CLI not found — re-run with --manual, or wire your own target." >&2
+  echo "!! 'claude' CLI not found. Install Claude Code (https://claude.com/claude-code) and log in," >&2
+  echo "   or re-run with --manual to drive another agent. No API key is required for a logged-in CLI." >&2
   exit 3
 fi
 
-# Agent-under-test: skills load automatically from ~/.claude/skills after install.sh.
-# (headless claude may need a permission flag on some versions, e.g. --dangerously-skip-permissions)
-( cd "$work" && claude -p "$instr" | tee "$AGENT_OUTPUT" >/dev/null ) || true
+# Agent-under-test: your logged-in Claude Code, headless, no key. --dangerously-skip-permissions
+# lets it write files unattended in this throwaway vault.
+( cd "$work" && claude -p "$instr" --dangerously-skip-permissions | tee "$AGENT_OUTPUT" >/dev/null ) || true
 "$HERE/assert_case.sh" "$CASE" "$work"

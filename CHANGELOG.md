@@ -18,6 +18,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/); this project aim
 - `install.sh --copy` — copy skills instead of symlinking (survives moving/deleting the repo).
 
 ### Changed
+- **Evals run key-free on your local Claude Code.** `run_case.sh` drives `claude -p` (your logged-in
+  session — no `ANTHROPIC_API_KEY`) and loads the skills project-scoped into each throwaway vault, so
+  the suite is self-contained (no `install.sh` needed). The LangSmith adapter needs only
+  `LANGSMITH_API_KEY`; the CI eval workflow documents a keyless self-hosted-runner path.
 - **All skills migrated to one flat vault model**: notes live in `notes/` with a frontmatter
   `category:`; bookkeeping standardized under `_system/`; staging standardized to `raw/`. Previously
   19/20 skills assumed per-category folders while the template shipped the flat layout.
