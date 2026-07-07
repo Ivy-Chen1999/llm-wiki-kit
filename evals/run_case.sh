@@ -36,6 +36,14 @@ case "$CASE" in
   synth1)    instr="synthesize a note connecting my related performance notes" ;;
   rebuild1)  instr="rebuild my wiki index from the notes" ;;
   capture1)  instr="save this to my wiki: We chose SQLite for the cache because it is zero-config and fast enough (decided 2026-07-07)." ;;
+  data1)     instr="ingest raw/team.csv into my wiki" ;;
+  url1)      instr="ingest this URL into my wiki: https://example.com" ;;
+  export1)   instr="export my wiki to a graph json" ;;
+  dash1)     instr="create a dashboard for my wiki" ;;
+  color1)    instr="color my Obsidian graph by category" ;;
+  status1)   instr="what's the status of my wiki?" ;;
+  claudehist1) instr="ingest my Claude Code history into the wiki" ;;
+  codexhist1)  instr="ingest my Codex history into the wiki" ;;
   *) echo "unknown case $CASE" >&2; exit 2 ;;
 esac
 
@@ -48,6 +56,12 @@ for d in "$REPO"/skills/*/; do ln -s "$d" "$work/.claude/skills/$(basename "$d")
 
 export OBSIDIAN_VAULT_PATH="$work"
 export AGENT_OUTPUT="$base/agent_output.txt"   # assert_case.sh reads this for answer-based cases
+# per-case env: point source/history overrides at the fixture dirs (kept hermetic — never the real ~/.claude)
+case "$CASE" in
+  status1)     export OBSIDIAN_SOURCES_DIR="$work/_srcdocs" ;;
+  claudehist1) export CLAUDE_HISTORY_PATH="$work/_hist/claude" ;;
+  codexhist1)  export CODEX_HISTORY_PATH="$work/_hist/codex" ;;
+esac
 echo "vault: $work"
 echo "task : $instr"
 

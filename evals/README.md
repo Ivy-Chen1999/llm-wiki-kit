@@ -30,11 +30,20 @@ pass criteria — then asserts on the files it produced.
 | `synth1` | wiki-synthesize | Creates a `category: synthesis` note that links ≥2 existing related notes. |
 | `rebuild1` | wiki-rebuild | Rebuilds `_system/index.md` from the notes on disk. |
 | `capture1` | wiki-capture | Captures a quick note into the vault (`notes/`/`raw/`), not into `_system/`. |
+| `data1` | data-ingest | Structured/tabular data (CSV) distilled into flat notes with `category`. |
+| `url1` | ingest-url | A fetched web page becomes a reference note recording its source URL. *(network)* |
+| `export1` | wiki-export | Exports the note graph to `wiki-export/` with the notes as nodes. |
+| `dash1` | wiki-dashboard | Creates an Obsidian `.base` dashboard keyed on the `category` property. |
+| `color1` | graph-colorize | Rewrites `.obsidian/graph.json` colorGroups keyed on category/tag queries. |
+| `status1` | wiki-status | Reports state and flags an un-ingested source as pending. |
+| `claudehist1` | claude-history-ingest | Distills a note from Claude history (hermetic `CLAUDE_HISTORY_PATH` fixture). |
+| `codexhist1` | codex-history-ingest | Distills a note from Codex history (hermetic `CODEX_HISTORY_PATH` fixture). |
 
-> Coverage: 14 cases exercise 11 skills behaviorally (the write/maintain/read core). The remaining
-> skills (`ingest-url`, `data-ingest` — ingest variants of `wiki-ingest`; `wiki-export`,
-> `wiki-dashboard`, `wiki-status`, `graph-colorize`; the two history-ingest skills) are covered by the
-> structural hygiene gate + manual runs; their behavioral cases are welcome PRs.
+> Coverage: 22 cases exercise **every actionable skill** behaviorally. (Only `llm-wiki` — the pattern
+> explainer — and `wiki-sourcing` — a doctrine applied within the other cases — have no standalone
+> case, by design.) The history-ingest cases run against fixture history via `CLAUDE_HISTORY_PATH` /
+> `CODEX_HISTORY_PATH`, so they never touch your real `~/.claude` or `~/.codex`. `url1` is the one
+> network-dependent case (it fetches `example.com`).
 
 Cases live in [`cases.jsonl`](cases.jsonl); each case's setup is an overlay dir under
 [`fixtures/`](fixtures/) (`fixtures/<case>/` is copied on top of the starter vault).

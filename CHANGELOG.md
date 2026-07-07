@@ -45,8 +45,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/); this project aim
 - **Adversarial LLM-judge** (`evals/judge.sh`, opt-in `JUDGE=1`) — a strict semantic second layer on
   top of the structural assertions, run key-free on local Claude Code. Validated: passes correct
   results, fails a deliberately-broken one.
-- **Eval coverage expanded to 14 cases across 11 skills** — added `visual1` (wiki-visual),
-  `crosslink1` (cross-linker), `tags1` (tag-taxonomy), `synth1` (wiki-synthesize), `rebuild1`
-  (wiki-rebuild), `capture1` (wiki-capture). All validated green on cold agents.
+- **Eval coverage now spans every actionable skill — 22 cases**, all validated green on cold agents.
+  Round 1 added `visual1`, `crosslink1`, `tags1`, `synth1`, `rebuild1`, `capture1`; round 2 added
+  `data1` (data-ingest), `url1` (ingest-url), `export1` (wiki-export), `dash1` (wiki-dashboard),
+  `color1` (graph-colorize), `status1` (wiki-status), and `claudehist1`/`codexhist1`
+  (history-ingest, run hermetically against `CLAUDE_HISTORY_PATH`/`CODEX_HISTORY_PATH` fixtures —
+  never the real `~/.claude`/`~/.codex`).
 - `vault-template/.gitignore` (keeps `_visual/`, `.env`, `_archives/`, Obsidian workspace state out of
   git); README CI + license badges.

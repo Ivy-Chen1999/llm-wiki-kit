@@ -75,6 +75,32 @@ case "$CASE" in
   capture1)
     chk "captured content saved somewhere in the vault" 'grep -rqi "SQLite" "$V/notes" "$V/raw" 2>/dev/null'
     chk "not lost to root or _system" '! grep -rqi "SQLite" "$V/_system" 2>/dev/null || grep -rqi "SQLite" "$V/notes" "$V/raw" 2>/dev/null' ;;
+  data1)
+    chk "structured data distilled into notes/" 'grep -rliE "ada|grace|team|retrieval|evaluation" "$V/notes" | grep -q .'
+    chk "notes carry category: frontmatter" 'grep -rqE "^category:" "$V/notes"' ;;
+  url1)
+    chk "a note was created from the fetched page" '[ -n "$(ls -A "$V/notes" 2>/dev/null)" ]'
+    chk "note records the source URL" 'grep -rqiE "source_url|example\.com|https?://" "$V/notes"' ;;
+  export1)
+    ef=$(ls "$V"/wiki-export/*.json 2>/dev/null | head -1)
+    chk "an export file was written to wiki-export/" '[ -n "'"$ef"'" ]'
+    chk "export contains the note nodes" '[ -n "'"$ef"'" ] && grep -qiE "embeddings|vector-search" "'"$ef"'"' ;;
+  dash1)
+    bf=$(find "$V" -name "*.base" 2>/dev/null | head -1)
+    chk "a .base dashboard file was created" '[ -n "'"$bf"'" ]'
+    chk "it keys on the category property" '[ -n "'"$bf"'" ] && grep -qi "category" "'"$bf"'"' ;;
+  color1)
+    chk ".obsidian/graph.json written with colorGroups" '[ -f "$V/.obsidian/graph.json" ] && grep -qi "colorGroups" "$V/.obsidian/graph.json"'
+    chk "colors keyed on category/tag queries" 'grep -qiE "category|tag:" "$V/.obsidian/graph.json"' ;;
+  status1)
+    chk "produced a status report" '[ -s "$OUT" ]'
+    chk "report flags the un-ingested source as pending" 'grep -qiE "newdoc|pending|un-?ingested|not.*ingest|1 (source|file|pending)" "$OUT"' ;;
+  claudehist1)
+    chk "a note distilled from Claude history" 'grep -rliE "debounce|react|search input" "$V/notes" | grep -q .'
+    chk "notes carry category: frontmatter" 'grep -rqE "^category:" "$V/notes"' ;;
+  codexhist1)
+    chk "a note distilled from Codex history" 'grep -rliE "rust|thiserror|anyhow|error handling" "$V/notes" | grep -q .'
+    chk "notes carry category: frontmatter" 'grep -rqE "^category:" "$V/notes"' ;;
   *) echo "unknown case: $CASE"; exit 2 ;;
 esac
 [ "$fails" -eq 0 ] && { echo "  → ALL PASS"; exit 0; } || { echo "  → $fails FAILED"; exit 1; }
