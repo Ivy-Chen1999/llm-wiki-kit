@@ -14,6 +14,8 @@ You are extracting knowledge from the user's past Codex sessions and distilling 
 
 This skill can be invoked directly or via the `wiki-history-ingest` router (`/wiki-history-ingest codex`).
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Also read `CODEX_HISTORY_PATH` (defaults to `~/.codex`).

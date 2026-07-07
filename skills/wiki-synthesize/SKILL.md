@@ -12,6 +12,8 @@ description: >
 
 You are scanning the wiki for concepts that co-occur across many pages but have no dedicated synthesis page connecting them. Your job is to surface these gaps and fill the most valuable ones with cross-cutting synthesis pages.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default)..
@@ -149,6 +151,7 @@ Skipped (consider next time):
 
 ## Quality Checklist
 
+- [ ] Applied the **wiki-sourcing** gate to every falsifiable claim (fetched source + `(as of …)`, else `[unverified]`/hedge)
 - [ ] Every synthesis page has a `summary:` field (≤200 chars)
 - [ ] Every synthesis page links back to its source concepts
 - [ ] Source concept pages link forward to the synthesis page

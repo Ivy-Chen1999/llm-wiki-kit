@@ -1,15 +1,19 @@
 ---
 name: ingest-url
 description: >
-  Fetch a URL and distill its content into the Obsidian wiki. The page lands directly in
-  notes/ as a reference note. Use this skill when the user says "/ingest-url <url>", "add
-  this URL to the wiki", "ingest this link", "save this page", or pastes a URL and says
-  "add this" or "save this to my wiki".
+  Fetch a remote web URL over the network and distill the fetched page into the Obsidian wiki as a
+  reference note in notes/. Use only when the user gives a URL to retrieve — "/ingest-url <url>",
+  "add this URL to the wiki", "ingest this link", "save this page", or pastes a link and says "add
+  this" / "save this to my wiki". For a local file already on disk (markdown, PDF, text, image), use
+  wiki-ingest instead; for structured data dumps (JSON, CSV, logs, chat/conversation exports), use
+  data-ingest instead.
 ---
 
 # Ingest URL — Web Page Distillation
 
 You are fetching a web page and distilling its content into an Obsidian wiki page. The distilled page lands directly in `notes/` as a reference note (`category: reference`) — the note's type is carried by its frontmatter, not by any folder.
+
+**When to use vs siblings:** this skill is for fetching a remote web URL over the network. For a local file already on disk (markdown, PDF, text, image), use `wiki-ingest`; for structured data dumps (JSON, CSV, logs, chat/conversation exports), use `data-ingest`.
 
 > **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
 

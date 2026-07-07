@@ -1,17 +1,20 @@
 ---
 name: wiki-ingest
 description: >
-  Ingest documents into the Obsidian wiki by distilling their knowledge into interconnected wiki pages.
-  Use this skill whenever the user wants to add new sources to their wiki, process a document or directory,
-  import articles, papers, or notes into their knowledge base, or says things like "add this to the wiki",
-  "process these docs", "ingest this folder". Also triggers when the user drops a file and wants it
-  incorporated into their existing knowledge base. Also handles raw mode: "process my drafts", "promote
-  my raw pages", or any reference to the raw/ staging directory.
+  Distill LOCAL files already in the vault or handed to you as files — markdown, PDF, plain text,
+  web clippings saved as files, and images/screenshots — into interconnected wiki pages, plus the
+  raw/ staging directory. Use when the user drops a document or folder and says "add this to the
+  wiki", "process these docs", "ingest this file/folder", "import this article/paper/note",
+  "promote my raw pages", or "process my drafts". For a web URL to fetch over the network, use
+  ingest-url instead; for structured data dumps (JSON, CSV, logs, chat/conversation exports), use
+  data-ingest instead.
 ---
 
 # Obsidian Ingest — Document Distillation
 
 You are ingesting source documents into an Obsidian wiki. Your job is not to summarize — it is to **distill and integrate** knowledge across the entire wiki.
+
+**When to use vs siblings:** this skill is for local files/documents already in the vault or handed to you as files (markdown, PDF, text, images/screenshots) and the `raw/` staging directory. To fetch a web URL over the network, use `ingest-url`; for structured data dumps (JSON, CSV, logs, chat/conversation exports), use `data-ingest`.
 
 > **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
 

@@ -1,17 +1,19 @@
 ---
 name: data-ingest
 description: >
-  Ingest any raw text data, conversation logs, chat exports, or unstructured documents into the Obsidian wiki.
-  Use this skill when the user wants to process data that isn't standard documents or Claude history —
-  things like ChatGPT exports, Slack threads, Discord logs, meeting transcripts, journal entries, CSV data,
-  browser bookmarks, email archives, or any raw text dump. Triggers on "ingest this data", "process these logs",
-  "add this export to the wiki", "import my chat history from X". This is the catch-all for any text source
-  not covered by the more specific ingest skills.
+  Ingest STRUCTURED or tabular data dumps and machine-generated exports into the Obsidian wiki —
+  JSON/JSONL, CSV/TSV, log files, and conversation/chat exports (ChatGPT exports, Slack threads,
+  Discord logs, meeting transcripts, email archives, browser bookmarks). Use when the user says
+  "ingest this data", "process these logs", "add this export to the wiki", or "import my chat history
+  from X". For a prose document or file already in the vault (markdown, PDF, text, image), use
+  wiki-ingest instead; for a web URL to fetch over the network, use ingest-url instead.
 ---
 
 # Data Ingest — Universal Text Source Handler
 
 You are ingesting arbitrary text data into an Obsidian wiki. The source could be anything — conversation exports, log files, transcripts, data dumps. Your job is to figure out the format, extract knowledge, and distill it into wiki pages.
+
+**When to use vs siblings:** this skill is for structured/tabular/log/chat-export data dumps (JSON, CSV, logs, conversation exports). For a prose document or file already in the vault (markdown, PDF, text, image), use `wiki-ingest`; to fetch a web URL over the network, use `ingest-url`.
 
 > **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
 

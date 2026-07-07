@@ -12,6 +12,8 @@ description: >
 
 You are preserving knowledge from the current conversation as a permanent wiki note. The goal is to extract the *substance* — the knowledge itself — not a summary of what was said.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
@@ -203,6 +205,7 @@ Type: synthesis
 
 ## Quality Checklist
 
+- [ ] Applied the **wiki-sourcing** gate to every falsifiable claim (fetched source + `(as of …)`, else `[unverified]`/hedge)
 - [ ] Content rewritten as declarative knowledge (not a chat transcript)
 - [ ] Type classified correctly and mapped to the right `category:`; note saved flat in `notes/`
 - [ ] Frontmatter complete with title, category, tags, sources, summary, provenance
