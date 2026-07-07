@@ -1,0 +1,48 @@
+name: eval
+
+# Behavioral evals — runs the agent-under-test against the skills and asserts on
+# the files it produces. Costs tokens + needs a key, so it's MANUAL (workflow_dispatch)
+# and no-ops unless the ANTHROPIC_API_KEY secret is set.
+#
+# Setup: repo Settings → Secrets → Actions → add ANTHROPIC_API_KEY.
+# Then: Actions tab → "eval" → Run workflow.
+on:
+  workflow_dispatch:
+
+jobs:
+  behavioral:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — need a key
+        run: |
+          if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "ANTHROPIC_API_KEY not set — skipping behavioral eval."
+            echo "Add it in repo Settings → Secrets to enable this workflow."
+            exit 0
+          fi
+
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Install the agent-under-test + link skills
+        if: env.ANTHROPIC_API_KEY != ''
+        run: |
+          npm i -g @anthropic-ai/claude-code
+          # link skills without the interactive vault/qmd steps
+          ./install.sh --skills-dir "$HOME/.claude/skills" <<< $'\n\nN\n' || true
+
+      - name: Run behavioral eval cases
+        if: env.ANTHROPIC_API_KEY != ''
+        run: |
+          # NOTE: headless claude may need a permission flag depending on CLI version,
+          # e.g. `claude -p --dangerously-skip-permissions`. Adjust run_case.sh if the
+          # agent step no-ops. assert_case.sh returns non-zero on any failed assertion.
+          rc=0
+          for c in source1 source2 source3 flat1; do
+            bash evals/run_case.sh "$c" || rc=1
+          done
+          exit $rc
