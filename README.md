@@ -90,6 +90,30 @@ The skills resolve the target vault in this order (highest first):
 
 So to keep a vault self-contained, drop a `.env` at its root pointing `OBSIDIAN_VAULT_PATH` at itself (and give it its own `QMD_WIKI_COLLECTION`). Work from that vault and the skills target only it — the global default and your other vaults are untouched.
 
+## For Obsidian users (sharing it with a colleague)
+
+If you already live in Obsidian, this is built for you — and it needs **no API key**.
+
+1. **Pick how you'll talk to it** (both use *your own* Claude login, no key):
+   - the **Claudian** plugin (Claude, inside Obsidian) — the in-app experience, or
+   - **Claude Code** (terminal), pointed at your vault folder.
+2. **Install the skills** — one terminal step, and it's non-destructive (only *adds* skills; never
+   touches your existing skills, `settings.json`, or plugins):
+   ```bash
+   git clone https://github.com/Ivy-Chen1999/llm-wiki-kit.git && cd llm-wiki-kit && ./install.sh
+   ```
+3. **Point it at a vault:**
+   - **New vault** — let the installer create one (flat layout, ready to go).
+   - **Your existing Obsidian vault** — drop a `.env` at its root with
+     `OBSIDIAN_VAULT_PATH="/path/to/your/vault"`, then tell the agent *"set up my wiki"*. `wiki-setup`
+     only creates the bits that are **missing** (`_system/`, templates) — it never overwrites your
+     notes, index, or config. The kit then maintains a `notes/` + `_system/` layer **alongside** your
+     existing files.
+4. **Use it** — open the vault and talk normally: *"add this to my wiki"*, *"what do I know about X?"*.
+
+Good to know: the kit organizes knowledge **flat** (`notes/` + a frontmatter `category`), so it builds
+its own tidy layer rather than reorganizing folders you already have. Your originals are never moved.
+
 ## How to use it — just say what you want
 
 You don't memorize skill names. Skills trigger automatically from what you say — Claude matches your message to the right one. Open your vault in Claude and talk normally:

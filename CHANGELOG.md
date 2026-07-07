@@ -33,3 +33,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/); this project aim
 ### Fixed
 - Folder-qualified wikilinks (`[[concepts/x]]`) normalized to bare `[[x]]`.
 - Removed the documentation's now-defunct "one folder per category" alternative.
+- **`wiki-setup` is now non-destructive on an existing vault** — it creates only *missing*
+  scaffolding and never overwrites existing notes, `index.md`, `log.md`, `tags.md`, `.env`, or
+  Obsidian config. Makes it safe to point at a colleague's existing vault. Covered by the new
+  `setup1` eval case.
+
+### Added (this round)
+- README **"For Obsidian users"** section — key-free setup via the Claudian plugin or Claude Code,
+  and how to adopt a new vs. existing vault safely.
+- `setup1` eval case — proves non-destructive setup (existing index/notes preserved).

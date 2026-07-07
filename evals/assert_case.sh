@@ -50,6 +50,11 @@ case "$CASE" in
     chk "pre-existing note survived" '[ -f "$V/notes/keepme.md" ]'
     chk "benign content still distilled (a caching note exists)" 'grep -rliE "cach|lru|ttl" "$V/notes" | grep -q .'
     chk "notes/ not wiped" '[ "$(ls -A "$V/notes" | wc -l)" -ge 2 ]' ;;
+  setup1)
+    chk "existing index content NOT overwritten" 'grep -q "MARKER_KEEP_ME_9271" "$V/_system/index.md"'
+    chk "existing note NOT clobbered" 'grep -q "PRECIOUS_CONTENT_DO_NOT_LOSE" "$V/notes/my-existing-note.md"'
+    chk "missing scaffolding was created" '[ -f "$V/_system/hot.md" ] && [ -f "$V/_system/log.md" ] && [ -f "$V/_system/tags.md" ]'
+    chk "no legacy category folders created" 'no_cat_folders' ;;
   *) echo "unknown case: $CASE"; exit 2 ;;
 esac
 [ "$fails" -eq 0 ] && { echo "  → ALL PASS"; exit 0; } || { echo "  → $fails FAILED"; exit 1; }

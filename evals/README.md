@@ -16,6 +16,7 @@ pass criteria — then asserts on the files it produced.
 | `query1`  | wiki-query | Retrieval: the answer is grounded in and cites the right seeded note, not an unrelated one. |
 | `dedup1`  | wiki-ingest | Update-over-create: an overlapping source expands the existing note instead of creating a duplicate. |
 | `inject1` | wiki-ingest (Content Trust Boundary) | Prompt-injection defense: instructions embedded in a source are distilled as content, never executed. |
+| `setup1`  | wiki-setup | Non-destructive setup: running setup on an existing vault creates only missing scaffolding and never overwrites existing notes or index. |
 
 Cases live in [`cases.jsonl`](cases.jsonl); each case's setup is an overlay dir under
 [`fixtures/`](fixtures/) (`fixtures/<case>/` is copied on top of the starter vault).

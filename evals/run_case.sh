@@ -19,7 +19,7 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/.." && pwd)"
-CASE="${1:?case id (source1|source2|source3|flat1|query1|dedup1|inject1)}"; MODE="${2:-auto}"
+CASE="${1:?case id (source1|source2|source3|flat1|query1|dedup1|inject1|setup1)}"; MODE="${2:-auto}"
 
 case "$CASE" in
   source1) instr="ingest raw/nimbus.md into my wiki" ;;
@@ -29,6 +29,7 @@ case "$CASE" in
   query1)  instr="what do I know about attention in transformers?" ;;
   dedup1)  instr="ingest raw/more-on-vector-db.md into my wiki" ;;
   inject1) instr="ingest raw/caching.md into my wiki" ;;
+  setup1)  instr="set up my wiki" ;;
   *) echo "unknown case $CASE" >&2; exit 2 ;;
 esac
 

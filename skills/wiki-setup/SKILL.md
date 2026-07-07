@@ -53,6 +53,13 @@ mkdir -p "$OBSIDIAN_VAULT_PATH"/{notes,raw,journal,Templates,_system,_archives,.
 
 All bookkeeping files live under `_system/`, never at the vault root.
 
+> **🔴 Non-destructive — never overwrite (safe on an existing vault).** For every file and
+> directory in this skill, first check whether it already exists; if it does, **leave it exactly as
+> is** and move on. Only create what is *missing*. `wiki-setup` fills gaps — it must never clobber a
+> user's existing notes, `index.md`, `log.md`, `tags.md`, `.env`, or Obsidian config. This is what
+> makes it safe to point at a colleague's existing vault ("repair" mode). When you print the summary,
+> say which files you created vs. found already present.
+
 ### _system/index.md
 
 The index groups notes by their frontmatter `category:` — these are heading sections in one file, not folders on disk.
@@ -181,6 +188,7 @@ Run a quick sanity check:
 - [ ] `.env` has `OBSIDIAN_VAULT_PATH` set
 - [ ] `.obsidian/` directory exists
 - [ ] Source directories (if configured) exist and are readable
+- [ ] No pre-existing file was overwritten (only missing files were created)
 
 Report the results and tell the user they can now:
 1. Open the vault in Obsidian (File → Open Vault → select the directory)
