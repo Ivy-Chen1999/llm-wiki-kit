@@ -7,7 +7,7 @@
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 K="${1:-3}"
-CASES="${CASES:-source1 source2 source3 flat1 query1 dedup1 inject1 setup1}"
+CASES="${CASES:-source1 source2 source3 flat1 query1 dedup1 inject1 setup1 visual1 crosslink1 tags1 synth1 rebuild1 capture1}"
 
 printf '\nRunning %s case(s) × %s run(s) each\n\n' "$(echo "$CASES" | wc -w | tr -d ' ')" "$K"
 overall_fail=0

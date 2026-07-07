@@ -55,6 +55,26 @@ case "$CASE" in
     chk "existing note NOT clobbered" 'grep -q "PRECIOUS_CONTENT_DO_NOT_LOSE" "$V/notes/my-existing-note.md"'
     chk "missing scaffolding was created" '[ -f "$V/_system/hot.md" ] && [ -f "$V/_system/log.md" ] && [ -f "$V/_system/tags.md" ]'
     chk "no legacy category folders created" 'no_cat_folders' ;;
+  visual1)
+    chk "self-contained HTML produced in _visual/" '[ -f "$V/_visual/retrieval-pipeline.html" ] && grep -qi "<html" "$V/_visual/retrieval-pipeline.html" && grep -qi "</html>" "$V/_visual/retrieval-pipeline.html"'
+    chk "no position:sticky/fixed (embed-safe)" '! grep -qiE "position:\s*(sticky|fixed)" "$V/_visual/retrieval-pipeline.html"'
+    chk "source note left unmodified" 'grep -q "VISUAL_MARKER_KEEP" "$V/notes/retrieval-pipeline.md"' ;;
+  crosslink1)
+    chk "mention of Transformer now links the note" 'grep -qiE "\[\[transformer(\|[^]]*)?\]\]" "$V/notes/attention.md"'
+    chk "links are bare (no folder-qualified)" '! grep -rqE "\[\[(concepts|entities|references|synthesis)/" "$V/notes"' ;;
+  tags1)
+    chk "off-whitelist tag ml/genai removed" '! grep -qE "(^|[[, ])(ml|genai)([],  ]|$)" "$V/notes/topic.md"'
+    chk "mapped to whitelisted tags" 'grep -qE "machine-learning|llm" "$V/notes/topic.md"' ;;
+  synth1)
+    synth=$(grep -rl "category: *synthesis" "$V/notes" 2>/dev/null | head -1)
+    chk "a synthesis note was created" '[ -n "'"$synth"'" ]'
+    chk "it links at least two of the seeded notes" '[ -n "'"$synth"'" ] && [ "$(grep -oiE "\[\[(caching|cdn|latency)\]\]" "'"$synth"'" 2>/dev/null | sort -u | wc -l)" -ge 2 ]' ;;
+  rebuild1)
+    chk "rebuilt index lists the existing notes" 'grep -qiE "alpha-note|Alpha note" "$V/_system/index.md" && grep -qiE "beta-note|Beta note" "$V/_system/index.md"'
+    chk "index was regenerated (stale timestamp advanced)" '! grep -q "updated: 2026-06-01" "$V/_system/index.md"' ;;
+  capture1)
+    chk "captured content saved somewhere in the vault" 'grep -rqi "SQLite" "$V/notes" "$V/raw" 2>/dev/null'
+    chk "not lost to root or _system" '! grep -rqi "SQLite" "$V/_system" 2>/dev/null || grep -rqi "SQLite" "$V/notes" "$V/raw" 2>/dev/null' ;;
   *) echo "unknown case: $CASE"; exit 2 ;;
 esac
 [ "$fails" -eq 0 ] && { echo "  → ALL PASS"; exit 0; } || { echo "  → $fails FAILED"; exit 1; }

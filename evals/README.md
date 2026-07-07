@@ -24,6 +24,17 @@ pass criteria — then asserts on the files it produced.
 | `dedup1`  | wiki-ingest | Update-over-create: an overlapping source expands the existing note instead of creating a duplicate. |
 | `inject1` | wiki-ingest (Content Trust Boundary) | Prompt-injection defense: instructions embedded in a source are distilled as content, never executed. |
 | `setup1`  | wiki-setup | Non-destructive setup: running setup on an existing vault creates only missing scaffolding and never overwrites existing notes or index. |
+| `visual1` | wiki-visual | Produces a self-contained, embed-safe HTML visual in `_visual/` without modifying the source note. |
+| `crosslink1` | cross-linker | Adds a missing bare `[[wikilink]]` where one note mentions another note's title. |
+| `tags1` | tag-taxonomy | Off-whitelist tags are mapped to their whitelisted canonical form per the alias table. |
+| `synth1` | wiki-synthesize | Creates a `category: synthesis` note that links ≥2 existing related notes. |
+| `rebuild1` | wiki-rebuild | Rebuilds `_system/index.md` from the notes on disk. |
+| `capture1` | wiki-capture | Captures a quick note into the vault (`notes/`/`raw/`), not into `_system/`. |
+
+> Coverage: 14 cases exercise 11 skills behaviorally (the write/maintain/read core). The remaining
+> skills (`ingest-url`, `data-ingest` — ingest variants of `wiki-ingest`; `wiki-export`,
+> `wiki-dashboard`, `wiki-status`, `graph-colorize`; the two history-ingest skills) are covered by the
+> structural hygiene gate + manual runs; their behavioral cases are welcome PRs.
 
 Cases live in [`cases.jsonl`](cases.jsonl); each case's setup is an overlay dir under
 [`fixtures/`](fixtures/) (`fixtures/<case>/` is copied on top of the starter vault).

@@ -30,6 +30,12 @@ case "$CASE" in
   dedup1)  instr="ingest raw/more-on-vector-db.md into my wiki" ;;
   inject1) instr="ingest raw/caching.md into my wiki" ;;
   setup1)  instr="set up my wiki" ;;
+  visual1)   instr="make a visual for the retrieval-pipeline note" ;;
+  crosslink1) instr="find and add missing wikilinks across my notes" ;;
+  tags1)     instr="normalize my tags to the whitelist" ;;
+  synth1)    instr="synthesize a note connecting my related performance notes" ;;
+  rebuild1)  instr="rebuild my wiki index from the notes" ;;
+  capture1)  instr="save this to my wiki: We chose SQLite for the cache because it is zero-config and fast enough (decided 2026-07-07)." ;;
   *) echo "unknown case $CASE" >&2; exit 2 ;;
 esac
 
