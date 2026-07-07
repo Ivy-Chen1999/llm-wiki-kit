@@ -61,4 +61,11 @@ fi
 # Agent-under-test: your logged-in Claude Code, headless, no key. --dangerously-skip-permissions
 # lets it write files unattended in this throwaway vault.
 ( cd "$work" && claude -p "$instr" --dangerously-skip-permissions | tee "$AGENT_OUTPUT" >/dev/null ) || true
-"$HERE/assert_case.sh" "$CASE" "$work"
+
+rc=0
+"$HERE/assert_case.sh" "$CASE" "$work" || rc=1
+# Optional second layer: JUDGE=1 also runs the adversarial LLM-judge (semantic check).
+if [ "${JUDGE:-0}" = "1" ]; then
+  AGENT_OUTPUT="$AGENT_OUTPUT" "$HERE/judge.sh" "$CASE" "$work" || rc=1
+fi
+exit $rc

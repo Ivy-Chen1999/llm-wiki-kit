@@ -5,6 +5,13 @@ tell you the skills aren't *broken*; these tell you an agent handed the skills a
 *does the right thing*. Each case gives a cold agent only a task + the skills — never the
 pass criteria — then asserts on the files it produced.
 
+**Two scoring layers** (both key-free, both run on your local Claude Code):
+- **Structural** (`assert_case.sh`, always on) — fast, deterministic file assertions; verify *form*.
+- **Adversarial LLM-judge** (`judge.sh`, opt-in via `JUDGE=1`) — a strict judge reads the criterion
+  plus the produced notes/answer and verdicts PASS/FAIL, defaulting to FAIL when unsure. Verifies
+  *meaning* (a claim is genuinely hedged; an answer is genuinely grounded) — catching what keyword
+  greps can't.
+
 ## What's covered
 
 | Case | Skill(s) | What it proves |
@@ -34,6 +41,10 @@ evals/run_case.sh source3
 
 # EVERY case × 3 runs, reported as a pass-rate (LLM output varies — one green run isn't enough)
 evals/run_all.sh 3
+
+# add the adversarial LLM-judge (semantic check on top of the structural asserts) — still key-free
+JUDGE=1 evals/run_case.sh source3
+JUDGE=1 evals/run_all.sh 3
 
 # no `claude` CLI, or want to test another agent? prepare + print the task, run your
 # agent by hand, then score the resulting vault:

@@ -42,3 +42,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/); this project aim
 - README **"For Obsidian users"** section — key-free setup via the Claudian plugin or Claude Code,
   and how to adopt a new vs. existing vault safely.
 - `setup1` eval case — proves non-destructive setup (existing index/notes preserved).
+- **Adversarial LLM-judge** (`evals/judge.sh`, opt-in `JUDGE=1`) — a strict semantic second layer on
+  top of the structural assertions, run key-free on local Claude Code. Validated: passes correct
+  results, fails a deliberately-broken one.
