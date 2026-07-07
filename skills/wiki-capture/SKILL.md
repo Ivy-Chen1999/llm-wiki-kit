@@ -12,11 +12,13 @@ description: >
 
 You are preserving knowledge from the current conversation as a permanent wiki note. The goal is to extract the *substance* — the knowledge itself — not a summary of what was said.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
-2. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand existing wiki content (avoid duplicates)
-3. Read `$OBSIDIAN_VAULT_PATH/hot.md` if it exists — it gives context on recent activity
+2. Read `$OBSIDIAN_VAULT_PATH/_system/index.md` to understand existing wiki content (avoid duplicates)
+3. Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` if it exists — it gives context on recent activity
 
 ## Step 1: Identify What's Worth Preserving
 
@@ -39,17 +41,19 @@ If nothing material emerged, tell the user and stop.
 
 ## Step 2: Classify the Content Type
 
-Assign one of five types — this determines the target folder and tone:
+Every note lives flat in `notes/`. What varies by type is the frontmatter `category:` and the body structure below — not the location. Classify the content into one of five types:
 
-| Type | Description | Target folder |
+| Type | Description | `category:` |
 |---|---|---|
-| `synthesis` | Multi-step analysis or an answer to a specific question that required reasoning | `synthesis/` |
-| `concept` | A definition, framework, or mental model (what a thing *is*) | `concepts/` |
-| `source` | Summary of an external document, article, or resource discussed | `references/` |
-| `decision` | A strategic, architectural, or design choice and its rationale | `synthesis/` |
-| `session` | A complete discussion summary when the conversation spans multiple topics | `journal/` |
+| `synthesis` | Multi-step analysis or an answer to a specific question that required reasoning | `synthesis` |
+| `concept` | A definition, framework, or mental model (what a thing *is*) | `concept` |
+| `source` | Summary of an external document, article, or resource discussed | `reference` |
+| `decision` | A strategic, architectural, or design choice and its rationale | `synthesis` |
+| `session` | A complete discussion summary when the conversation spans multiple topics | `synthesis` |
 
-If the content clearly belongs to a specific project (detected from context or user mention), place it under `projects/<project-name>/<category>/` instead.
+Note also `entity` (a person / organization / tool) and `insight` (the user's own take) as valid categories if the content is really one of those.
+
+If the content clearly belongs to a specific project, it still lands in `notes/` like everything else; record the project association with a tag rather than a subfolder.
 
 ## Step 3: Rewrite as Declarative Knowledge
 
@@ -80,7 +84,7 @@ Create the file at the target path with required frontmatter:
 ---
 title: >-
   <Title>
-category: <synthesis|concepts|references|journal|skills>
+category: <concept|entity|reference|insight|synthesis>
 tags: [<2-5 domain tags from taxonomy>]
 sources:
   - conversation:<ISO-date>
@@ -177,33 +181,34 @@ Body structure by type:
 <[[wikilinks]]>
 ```
 
-Every note must link to at least 2 existing wiki pages. Search `index.md` before writing. If fewer than 2 related pages exist, create minimal stubs for the most important concepts referenced.
+Every note must link to at least 2 existing wiki pages. Search `_system/index.md` before writing. If fewer than 2 related pages exist, create minimal stubs for the most important concepts referenced.
 
 ## Step 6: Update Tracking Files
 
-**`index.md`** — Add the new page under its category section.
+**`_system/index.md`** — Add the new page under its category section.
 
-**`log.md`** — Append:
+**`_system/log.md`** — Append:
 ```
-- [TIMESTAMP] CAPTURE type=<type> page="<path>" title="<title>"
+- [TIMESTAMP] CAPTURE type=<type> page="notes/<slug>.md" title="<title>"
 ```
 
-**`hot.md`** — Update **Recent Activity** with what was just captured. Update **Key Takeaways** if the note introduced something worth flagging. Update `updated` timestamp.
+**`_system/hot.md`** — Update **Recent Activity** with what was just captured. Update **Key Takeaways** if the note introduced something worth flagging. Update `updated` timestamp.
 
 ## Step 7: Confirm to User
 
 Report the saved path and title:
 ```
-Saved to: projects/<name>/synthesis/<slug>.md
+Saved to: notes/<slug>.md
 Title: <Title>
 Type: synthesis
 ```
 
 ## Quality Checklist
 
+- [ ] Applied the **wiki-sourcing** gate to every falsifiable claim (fetched source + `(as of …)`, else `[unverified]`/hedge)
 - [ ] Content rewritten as declarative knowledge (not a chat transcript)
-- [ ] Type classified correctly; target path is in the right folder
+- [ ] Type classified correctly and mapped to the right `category:`; note saved flat in `notes/`
 - [ ] Frontmatter complete with title, category, tags, sources, summary, provenance
 - [ ] At least 2 wikilinks to existing pages
-- [ ] `index.md`, `log.md`, and `hot.md` updated
+- [ ] `_system/index.md`, `_system/log.md`, and `_system/hot.md` updated
 - [ ] Confirmed save path to user

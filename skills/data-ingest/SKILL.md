@@ -1,23 +1,27 @@
 ---
 name: data-ingest
 description: >
-  Ingest any raw text data, conversation logs, chat exports, or unstructured documents into the Obsidian wiki.
-  Use this skill when the user wants to process data that isn't standard documents or Claude history —
-  things like ChatGPT exports, Slack threads, Discord logs, meeting transcripts, journal entries, CSV data,
-  browser bookmarks, email archives, or any raw text dump. Triggers on "ingest this data", "process these logs",
-  "add this export to the wiki", "import my chat history from X". This is the catch-all for any text source
-  not covered by the more specific ingest skills.
+  Ingest STRUCTURED or tabular data dumps and machine-generated exports into the Obsidian wiki —
+  JSON/JSONL, CSV/TSV, log files, and conversation/chat exports (ChatGPT exports, Slack threads,
+  Discord logs, meeting transcripts, email archives, browser bookmarks). Use when the user says
+  "ingest this data", "process these logs", "add this export to the wiki", or "import my chat history
+  from X". For a prose document or file already in the vault (markdown, PDF, text, image), use
+  wiki-ingest instead; for a web URL to fetch over the network, use ingest-url instead.
 ---
 
 # Data Ingest — Universal Text Source Handler
 
 You are ingesting arbitrary text data into an Obsidian wiki. The source could be anything — conversation exports, log files, transcripts, data dumps. Your job is to figure out the format, extract knowledge, and distill it into wiki pages.
 
+**When to use vs siblings:** this skill is for structured/tabular/log/chat-export data dumps (JSON, CSV, logs, conversation exports). For a prose document or file already in the vault (markdown, PDF, text, image), use `wiki-ingest`; to fetch a web URL over the network, use `ingest-url`.
+
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
 2. Read `.manifest.json` at the vault root — check if this source has been ingested before
-3. Read `index.md` at the vault root to know what already exists
+3. Read `_system/index.md` to know what already exists
 
 If the source path is already in `.manifest.json` and the file hasn't been modified since `ingested_at`, tell the user it's already been ingested. Ask if they want to re-ingest anyway.
 
@@ -113,7 +117,7 @@ Before creating pages:
 
 Follow the `wiki-ingest` skill's process for creating/updating pages:
 
-- Use correct category directories (`concepts/`, `entities/`, `skills/`, etc.)
+- Write every page flat into `notes/` — there are no per-type folders. Set the note's type with the `category:` frontmatter field (`concept`, `entity`, `reference`, `insight`, or `synthesis`).
 - Add YAML frontmatter with title, category, tags, sources
 - Use `[[wikilinks]]` to connect to existing pages
 - Attribute claims to their source
@@ -130,17 +134,17 @@ Follow the `wiki-ingest` skill's process for creating/updating pages:
   "modified_at": FILE_MTIME,
   "source_type": "data",  // or "image" for png/jpg/webp/gif sources
   "project": "project-name-or-null",
-  "pages_created": ["list/of/pages.md"],
-  "pages_updated": ["list/of/pages.md"]
+  "pages_created": ["notes/page-a.md", "notes/page-b.md"],
+  "pages_updated": ["notes/page-c.md"]
 }
 ```
 
-**`index.md`** and **`log.md`**:
+**`_system/index.md`** and **`_system/log.md`**:
 ```
 - [TIMESTAMP] DATA_INGEST source="path/to/data" format=FORMAT pages_updated=X pages_created=Y
 ```
 
-**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with the most meaningful thing extracted from this data source — last 3 operations max. Update `updated` timestamp.
+**`_system/hot.md`** — Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with the most meaningful thing extracted from this data source — last 3 operations max. Update `updated` timestamp.
 
 ## Tips
 

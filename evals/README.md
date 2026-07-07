@@ -1,0 +1,97 @@
+# Evals
+
+Behavioral evals for the kit's skills. Static checks (does the text parse, no stray paths)
+tell you the skills aren't *broken*; these tell you an agent handed the skills actually
+*does the right thing*. Each case gives a cold agent only a task + the skills — never the
+pass criteria — then asserts on the files it produced.
+
+**Two scoring layers** (both key-free, both run on your local Claude Code):
+- **Structural** (`assert_case.sh`, always on) — fast, deterministic file assertions; verify *form*.
+- **Adversarial LLM-judge** (`judge.sh`, opt-in via `JUDGE=1`) — a strict judge reads the criterion
+  plus the produced notes/answer and verdicts PASS/FAIL, defaulting to FAIL when unsure. Verifies
+  *meaning* (a claim is genuinely hedged; an answer is genuinely grounded) — catching what keyword
+  greps can't.
+
+## What's covered
+
+| Case | Skill(s) | What it proves |
+|------|----------|----------------|
+| `source1` | wiki-ingest + wiki-sourcing | Unverifiable falsifiable facts are hedged (`[unverified]`), not asserted as bare fact. |
+| `source2` | wiki-ingest + wiki-sourcing | A claim that only appears in a digest is treated as second-hand — hedged, not minted into a confident entity page. |
+| `source3` | wiki-update + wiki-sourcing | **Anti-sycophancy**: sourceless user pushback does not flip a verified, sourced claim. |
+| `flat1`   | wiki-ingest | Flat-model conformance: notes land in `notes/` with frontmatter `category`, no per-category folders, bare `[[links]]`, index updated. |
+| `query1`  | wiki-query | Retrieval: the answer is grounded in and cites the right seeded note, not an unrelated one. |
+| `dedup1`  | wiki-ingest | Update-over-create: an overlapping source expands the existing note instead of creating a duplicate. |
+| `inject1` | wiki-ingest (Content Trust Boundary) | Prompt-injection defense: instructions embedded in a source are distilled as content, never executed. |
+| `setup1`  | wiki-setup | Non-destructive setup: running setup on an existing vault creates only missing scaffolding and never overwrites existing notes or index. |
+| `visual1` | wiki-visual | Produces a self-contained, embed-safe HTML visual in `_visual/` without modifying the source note. |
+| `crosslink1` | cross-linker | Adds a missing bare `[[wikilink]]` where one note mentions another note's title. |
+| `tags1` | tag-taxonomy | Off-whitelist tags are mapped to their whitelisted canonical form per the alias table. |
+| `synth1` | wiki-synthesize | Creates a `category: synthesis` note that links ≥2 existing related notes. |
+| `rebuild1` | wiki-rebuild | Rebuilds `_system/index.md` from the notes on disk. |
+| `capture1` | wiki-capture | Captures a quick note into the vault (`notes/`/`raw/`), not into `_system/`. |
+| `data1` | data-ingest | Structured/tabular data (CSV) distilled into flat notes with `category`. |
+| `url1` | ingest-url | A fetched web page becomes a reference note recording its source URL. *(network)* |
+| `export1` | wiki-export | Exports the note graph to `wiki-export/` with the notes as nodes. |
+| `dash1` | wiki-dashboard | Creates an Obsidian `.base` dashboard keyed on the `category` property. |
+| `color1` | graph-colorize | Rewrites `.obsidian/graph.json` colorGroups keyed on category/tag queries. |
+| `status1` | wiki-status | Reports state and flags an un-ingested source as pending. |
+| `claudehist1` | claude-history-ingest | Distills a note from Claude history (hermetic `CLAUDE_HISTORY_PATH` fixture). |
+| `codexhist1` | codex-history-ingest | Distills a note from Codex history (hermetic `CODEX_HISTORY_PATH` fixture). |
+
+> Coverage: 22 cases exercise **every actionable skill** behaviorally. (Only `llm-wiki` — the pattern
+> explainer — and `wiki-sourcing` — a doctrine applied within the other cases — have no standalone
+> case, by design.) The history-ingest cases run against fixture history via `CLAUDE_HISTORY_PATH` /
+> `CODEX_HISTORY_PATH`, so they never touch your real `~/.claude` or `~/.codex`. `url1` is the one
+> network-dependent case (it fetches `example.com`).
+
+Cases live in [`cases.jsonl`](cases.jsonl); each case's setup is an overlay dir under
+[`fixtures/`](fixtures/) (`fixtures/<case>/` is copied on top of the starter vault).
+
+## Run it
+
+**No API key needed.** The agent-under-test is your local, already-logged-in Claude Code
+(`run_case.sh` drives `claude -p`, using the same auth as your interactive sessions). It's also
+self-contained — it loads the kit's skills project-scoped into each throwaway vault, so you don't
+need to run `install.sh` first. Just have Claude Code installed and logged in.
+
+```bash
+# one case, end-to-end (sets up an isolated vault, runs `claude -p`, scores it)
+evals/run_case.sh source3
+
+# EVERY case × 3 runs, reported as a pass-rate (LLM output varies — one green run isn't enough)
+evals/run_all.sh 3
+
+# add the adversarial LLM-judge (semantic check on top of the structural asserts) — still key-free
+JUDGE=1 evals/run_case.sh source3
+JUDGE=1 evals/run_all.sh 3
+
+# no `claude` CLI, or want to test another agent? prepare + print the task, run your
+# agent by hand, then score the resulting vault:
+evals/run_case.sh flat1 --manual
+AGENT_OUTPUT=<answer-file> evals/assert_case.sh flat1 /path/to/that/vault
+```
+
+`assert_case.sh` exits non-zero if any assertion fails, so it drops straight into CI.
+
+## LangSmith
+
+[`langsmith_eval.py`](langsmith_eval.py) wraps the same cases + assertions as a LangSmith
+dataset and evaluators, for traces and run-over-run comparison:
+
+```bash
+pip install langsmith
+export LANGSMITH_API_KEY=...   ANTHROPIC_API_KEY=...
+python evals/langsmith_eval.py
+```
+
+The scores are identical to `assert_case.sh` — LangSmith just adds tracing and history.
+Swap the agent-under-test by editing `run_agent()` in that file.
+
+## Adding a case
+
+1. Create `fixtures/<case>/` as an overlay — whatever it contains (e.g. `raw/foo.md`,
+   `notes/bar.md`, `_system/index.md`) is copied on top of the starter vault.
+2. Add a line to `cases.jsonl` (`id`, `skill`, `instruction`, `tests`, `asserts`).
+3. Add the case's `instruction` to the `case` map in `run_case.sh`, and a scoring branch in
+   `assert_case.sh` (hard file assertions; use `$OUT` for answer-based cases like `query1`).

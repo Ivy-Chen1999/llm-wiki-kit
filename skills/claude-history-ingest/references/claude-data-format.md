@@ -78,12 +78,12 @@ rule/fact, then **Why:** and **How to apply:** lines.
 
 **Memory types and their wiki value:**
 
-| Type        | Contains                                 | Maps to wiki                                           |
-| ----------- | ---------------------------------------- | ------------------------------------------------------ |
-| `user`      | User's role, preferences, expertise      | Entity page about the user, or context for other pages |
-| `feedback`  | Workflow corrections and confirmations   | Skills pages — "how to work effectively"               |
-| `project`   | Active work, goals, decisions, deadlines | Entity pages for projects                              |
-| `reference` | Pointers to external resources           | Reference pages                                        |
+| Type        | Contains                                 | Maps to wiki                                                        |
+| ----------- | ---------------------------------------- | ------------------------------------------------------------------ |
+| `user`      | User's role, preferences, expertise      | An entity note about the user (`category: entity`), or context for other notes |
+| `feedback`  | Workflow corrections and confirmations   | Concept notes (`category: concept`) — "how to work effectively"     |
+| `project`   | Active work, goals, decisions, deadlines | The project's entity note (`category: entity`)                      |
+| `reference` | Pointers to external resources           | Reference notes (`category: reference`)                             |
 
 `MEMORY.md` in each memory directory is an index with one-line summaries. Read it first to triage.
 

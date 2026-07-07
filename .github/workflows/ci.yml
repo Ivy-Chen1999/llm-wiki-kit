@@ -1,0 +1,16 @@
+name: ci
+
+# Deterministic repo-hygiene gate — no secrets, runs on every push/PR.
+# Guards clone-and-go + flat-model invariants (see scripts/check.sh).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repo hygiene checks
+        run: bash scripts/check.sh

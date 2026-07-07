@@ -1,0 +1,41 @@
+name: eval
+
+# Behavioral evals — runs the agent-under-test against the skills and asserts on the
+# files it produces. Costs tokens, so it's MANUAL (workflow_dispatch).
+#
+# Two ways to give the runner auth (pick one):
+#   A) KEYLESS, recommended — a SELF-HOSTED runner where you've already run Claude Code
+#      and logged in (`claude login`). The eval then uses that local session, exactly like
+#      running evals/run_all.sh on your laptop. No secret needed.
+#        -> set `runs-on: [self-hosted]` below.
+#   B) HOSTED — GitHub's ubuntu runner + an ANTHROPIC_API_KEY secret
+#      (repo Settings → Secrets → Actions). Fresh runners can't reuse your local login,
+#      so this path needs the key.
+on:
+  workflow_dispatch:
+
+jobs:
+  behavioral:
+    # For the keyless path, change this to: [self-hosted]
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure Claude Code is available
+        run: |
+          command -v claude >/dev/null 2>&1 || npm i -g @anthropic-ai/claude-code
+          claude --version || true
+
+      - name: Auth check
+        run: |
+          # Keyless self-hosted runners are already logged in. Hosted runners need the key.
+          if ! claude -p "reply OK" --dangerously-skip-permissions >/dev/null 2>&1; then
+            echo "Claude Code is not authenticated on this runner."
+            echo "Use a self-hosted runner that has run 'claude login', OR set the ANTHROPIC_API_KEY secret."
+            exit 1
+          fi
+
+      - name: Run behavioral eval cases (x3, pass-rate)
+        run: evals/run_all.sh 3

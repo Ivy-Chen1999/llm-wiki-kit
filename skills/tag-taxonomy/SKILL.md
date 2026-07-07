@@ -16,12 +16,12 @@ You are enforcing consistent tagging across the wiki by normalizing tags to a co
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
-2. Read `$OBSIDIAN_VAULT_PATH/_meta/taxonomy.md` — this is the canonical tag list
-3. Read `index.md` to understand the wiki's scope
+2. Read `$OBSIDIAN_VAULT_PATH/_system/tags.md` — this is the canonical tag list
+3. Read `$OBSIDIAN_VAULT_PATH/_system/index.md` to understand the wiki's scope
 
 ## The Taxonomy File
 
-The canonical tag vocabulary lives at `$OBSIDIAN_VAULT_PATH/_meta/taxonomy.md`. It defines:
+The canonical tag vocabulary lives at `$OBSIDIAN_VAULT_PATH/_system/tags.md`. It defines:
 
 - **Canonical tags** — the tags that should be used
 - **Aliases** — common alternatives that should be mapped to the canonical form
@@ -56,9 +56,11 @@ When the user wants to see the current state of tags:
 ### Step 1: Scan all pages
 
 ```
-Glob: $VAULT_PATH/**/*.md (excluding _archives/, .obsidian/, _meta/)
+Glob: $OBSIDIAN_VAULT_PATH/notes/*.md
 Extract: tags field from YAML frontmatter
 ```
+
+All knowledge notes live flat in `notes/`, so a single glob covers them; bookkeeping files under `_system/` and the `_archives/` store are outside `notes/` and are not scanned.
 
 ### Step 2: Build a tag frequency table
 
@@ -100,9 +102,9 @@ For each tag found, count how many pages use it. Flag:
 
 ### Over-Tagged Pages
 
-| Page                   | Tag Count | Tags                 |
-| ---------------------- | --------- | -------------------- |
-| `entities/jane-doe.md` | 8         | ai, ml, founder, ... |
+| Page                | Tag Count | Tags                 |
+| ------------------- | --------- | -------------------- |
+| `notes/jane-doe.md` | 8         | ai, ml, founder, ... |
 ```
 
 ## Mode 2: Tag Normalization
@@ -140,13 +142,13 @@ For tags that aren't in the taxonomy and aren't aliases:
 
 ### Step 4: Update taxonomy
 
-If new canonical tags were agreed upon, append them to `_meta/taxonomy.md` in the correct section.
+If new canonical tags were agreed upon, append them to `_system/tags.md` in the correct section.
 
 ## Mode 3: Tagging a New Page
 
 When you're creating a wiki page and need to choose tags:
 
-1. Read `_meta/taxonomy.md`
+1. Read `_system/tags.md`
 2. Select up to 5 tags that best describe the page:
    - 1-2 **domain tags** (what subject area)
    - 1 **type tag** (what kind of thing)
@@ -161,14 +163,14 @@ When the user wants to add a tag to the vocabulary:
 
 1. Check if an existing tag already covers the concept (suggest it if so)
 2. If genuinely new, determine which section it belongs in (Domain, Type, Project)
-3. Add it to `_meta/taxonomy.md` with:
+3. Add it to `_system/tags.md` with:
    - The canonical tag name
    - What it's used for
    - Any aliases to redirect
 
 ## After Any Tag Operation
 
-Append to `log.md`:
+Append to `$OBSIDIAN_VAULT_PATH/_system/log.md`:
 
 ```
 - [TIMESTAMP] TAG_AUDIT tags_normalized=N unknown_tags=M pages_modified=P
@@ -180,4 +182,4 @@ Or for normalization:
 - [TIMESTAMP] TAG_NORMALIZE tags_renamed=N pages_modified=M new_tags_added=P
 ```
 
-**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary — e.g. "Tag audit: normalized 14 tags across 28 pages; 2 new canonical tags added." Keep the last 3 operations. Update `updated` timestamp.
+**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary — e.g. "Tag audit: normalized 14 tags across 28 pages; 2 new canonical tags added." Keep the last 3 operations. Update `updated` timestamp.

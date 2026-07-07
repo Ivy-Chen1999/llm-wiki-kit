@@ -4,7 +4,7 @@ description: >
   Create dynamic, queryable dashboard views of the Obsidian vault using Obsidian Bases — a native
   Obsidian feature that turns vault frontmatter into interactive tables, card galleries, and lists.
   Use this skill when the user says "create a dashboard", "vault dashboard", "show all X as a table",
-  "dynamic view", "query my vault", "build a content index", "show me all concepts/entities/projects",
+  "dynamic view", "query my vault", "build a content index", "show me all concepts, entities, or insights",
   or wants a structured, auto-updating view of their wiki content.
   Requires Obsidian 1.8+ (Bases is a core plugin, no external install needed).
 ---
@@ -16,13 +16,13 @@ You are creating a `.base` file — an Obsidian Bases definition that turns vaul
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default).
-2. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand what categories and pages exist
-3. Ask the user what they want to view if not specified — what folder, tag, category, or date range?
+2. Read `$OBSIDIAN_VAULT_PATH/_system/index.md` to understand what categories and pages exist
+3. Ask the user what they want to view if not specified — which category, tag, or date range?
 
 ## What Obsidian Bases Can Do
 
-`.base` files define database-style views over vault notes. Each file declares:
-- **Which notes to include** — filtered by folder, tag, frontmatter property, or combination
+`.base` files define database-style views over vault notes. Every note lives flat in `notes/`, so views are built by frontmatter — the `category` property is what distinguishes concepts, entities, references, insights, and synthesis pages. Each file declares:
+- **Which notes to include** — filtered by `category` (or any frontmatter property), tag, or combination
 - **Which properties to show** — any frontmatter field becomes a column
 - **What view type** — `table`, `cards`, or `list`
 - **Sort and group** — by any property
@@ -33,21 +33,47 @@ Embed a `.base` into any note with `![[MyBase.base]]`.
 ## Step 1: Understand the Request
 
 Determine:
-- **What to show** — all pages in a category? Pages with a specific tag? A project's pages?
-- **What columns matter** — title, tags, created, updated, summary, category, project?
+- **What to show** — all pages in a category? Pages with a specific tag? Pages in a date range?
+- **What columns matter** — title, tags, created, updated, summary, category, sources?
 - **View type** — table (default), cards (visual), or list (minimal)
 - **Sort order** — by updated (default), created, title, or a custom property
-- **Any filters** — date range, specific tags, folder scope
+- **Any filters** — date range, specific tags, category scope
 
 ## Step 2: Generate the `.base` File
 
 The `.base` format is YAML. Here are the patterns you'll use:
 
-### Basic table — all pages in a category folder
+### Vault overview — every note, grouped and counted by category
+All knowledge notes live flat in `notes/`, so scope to that folder and group by the `category`
+property. Grouped views show a per-group count in each group header — this is the canonical
+"how much do I have of each type" dashboard.
 ```yaml
 filters:
   - type: folder
-    folder: concepts
+    folder: notes
+columns:
+  - property: file.name
+    title: Page
+  - property: category
+    title: Category
+  - property: updated
+    title: Updated
+group:
+  - property: category
+sort:
+  - property: updated
+    direction: desc
+view: table
+```
+
+### Basic table — all pages in one category
+Notes carry their type in frontmatter, so filter on the `category` property (e.g. `concept`)
+rather than a folder.
+```yaml
+filters:
+  - type: property
+    property: category
+    value: concept
 columns:
   - property: file.name
     title: Page
@@ -83,18 +109,19 @@ sort:
 view: table
 ```
 
-### Multi-filter (folder AND tag)
+### Multi-filter (category AND tag)
 ```yaml
 filters:
   operator: and
   conditions:
-    - type: folder
-      folder: projects
+    - type: property
+      property: category
+      value: insight
     - type: tag
       tag: "#active"
 columns:
   - property: file.name
-    title: Project
+    title: Page
   - property: summary
     title: Summary
   - property: updated
@@ -141,7 +168,7 @@ Create `_meta/` if it doesn't exist yet.
 
 ## Step 4: Embed (optional)
 
-If the user wants the dashboard embedded in an existing note (e.g., `index.md` or a project overview), add:
+If the user wants the dashboard embedded in an existing note (e.g., `_system/index.md` or a project overview page), add:
 
 ```markdown
 ## <Dashboard Title>
@@ -153,7 +180,7 @@ Ask the user before modifying an existing note.
 
 ## Step 5: Update Tracking
 
-**`log.md`** — Append:
+**`_system/log.md`** — Append:
 ```
 - [TIMESTAMP] WIKI_DASHBOARD name="<slug>" view=<type> filter="<description>"
 ```
@@ -166,18 +193,18 @@ Tell the user about these if they're not sure what to ask for:
 
 | Dashboard | What it shows |
 |---|---|
-| **Content index** | All wiki pages grouped by category, sortable by updated date |
-| **Entity tracker** | All entity pages (people, tools, orgs) with tags and sources |
+| **Content index** | Every note in `notes/` grouped and counted by `category`, sortable by updated date |
+| **Entity tracker** | All `category: entity` pages (people, tools, orgs) with tags and sources |
 | **Ingestion log** | Pages sorted by `created` date — see what was added recently |
 | **Stale content** | Pages not updated in 30+ days — maintenance view |
-| **Project overview** | All project pages with last-sync date |
+| **Project overview** | Pages tagged for a project, sorted by last update |
 | **Tag cloud** | Pages grouped by tag — see coverage across topics |
-| **Research tracker** | All synthesis pages tagged `research` — shows research history |
+| **Research tracker** | All `category: synthesis` pages tagged `research` — shows research history |
 
 ## Quality Checklist
 
 - [ ] `.base` YAML is valid and uses correct field names
-- [ ] Filter matches the user's intent
+- [ ] Filter targets `category` (or another frontmatter property) / tag — not a note-type folder
 - [ ] File written to `_meta/` with a descriptive slug
-- [ ] `log.md` updated
+- [ ] `_system/log.md` updated
 - [ ] User told how to embed it (`![[_meta/<name>.base]]`) and what Obsidian version is required (1.8+)

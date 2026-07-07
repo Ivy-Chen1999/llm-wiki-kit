@@ -1,0 +1,3 @@
+{"type":"session_meta","payload":{"id":"t1","thread_name":"Rust error handling"}}
+{"type":"event_msg","payload":{"role":"user","text":"How should I structure errors in a Rust CLI?"}}
+{"type":"event_msg","payload":{"role":"assistant","text":"Use the thiserror crate for library error enums and anyhow at the CLI boundary — the idiomatic Rust error-handling pattern."}}

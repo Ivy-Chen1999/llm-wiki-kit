@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":"How do I debounce a search input in React?"},"sessionId":"s1"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Debounce it: in a useEffect, setTimeout to run the query after a delay and clear the timeout on cleanup. A standard React performance pattern for search inputs."}]},"sessionId":"s1"}

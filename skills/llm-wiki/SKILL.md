@@ -23,7 +23,7 @@ Think of raw sources as the "source code" — authoritative but hard to query di
 
 ### Layer 2: The Wiki (LLM-maintained)
 
-A collection of interconnected Obsidian-compatible markdown files organized by category. This is the compiled knowledge — synthesized, cross-referenced, and navigable. Each page has:
+A collection of interconnected Obsidian-compatible markdown files. Every knowledge note lives **flat in `notes/`** — a note's type is set by its YAML frontmatter `category:`, never by which folder it sits in. This is the compiled knowledge — synthesized, cross-referenced, and navigable. Each page has:
 
 - YAML frontmatter (title, category, tags, sources, timestamps)
 - Obsidian `[[wikilinks]]` connecting related concepts
@@ -47,59 +47,37 @@ The rules governing how the wiki is structured — categories, conventions, page
 
 ## Wiki Organization
 
-The vault has two levels of structure: **categories** (what kind of knowledge) and **projects** (where the knowledge came from).
+The vault is **flat**: every knowledge note lives directly in `notes/`, and its type comes from the YAML frontmatter `category:` field — never from which folder it sits in. There are no `concepts/`, `entities/`, `references/`, or `synthesis/` folders on disk, and no per-project subfolders. A note about a concept, a note about a person, and a note summarizing a source are all files side by side in `notes/`; only their `category:` distinguishes them.
 
 ### Categories
 
-Organize pages into these default categories (customizable in `.env`):
+Set each note's type with the `category:` frontmatter field. Use one of these values:
 
-| Category | Purpose | Example |
+| `category:` value | Purpose | Example note |
 |---|---|---|
-| `concepts/` | Ideas, theories, mental models | `concepts/transformer-architecture.md` |
-| `entities/` | People, orgs, tools, projects | `entities/andrej-karpathy.md` |
-| `skills/` | How-to knowledge, procedures | `skills/fine-tuning-llms.md` |
-| `references/` | Summaries of specific sources | `references/attention-is-all-you-need.md` |
-| `synthesis/` | Cross-cutting analysis across sources | `synthesis/scaling-laws-debate.md` |
-| `journal/` | Timestamped observations, session logs | `journal/2024-03-15.md` |
+| `concept` | Ideas, theories, mental models, how-to procedures | `notes/transformer-architecture.md` |
+| `entity` | People, orgs, tools, products | `notes/andrej-karpathy.md` |
+| `reference` | Summaries of a specific external source | `notes/attention-is-all-you-need.md` |
+| `synthesis` | Cross-cutting analysis spanning several sources | `notes/scaling-laws-debate.md` |
+| `insight` | The user's own take, observation, or conclusion | `notes/why-attention-scales.md` |
 
-### Projects
+Timestamped daily notes and session logs are not knowledge notes — they live in the separate `journal/` folder (e.g. `journal/2024-03-15.md`), not in `notes/`.
 
-Knowledge often belongs to a specific project. The `projects/` directory mirrors this:
+### Project knowledge
 
-```
-$OBSIDIAN_VAULT_PATH/
-├── projects/
-│   ├── my-project/
-│   │   ├── my-project.md      ← project overview (named after project)
-│   │   ├── concepts/          ← project-scoped category pages
-│   │   ├── skills/
-│   │   └── ...
-│   ├── another-project/
-│   │   └── ...
-│   └── side-project/
-│       └── ...
-├── concepts/                   ← global (cross-project) knowledge
-├── entities/
-├── skills/
-└── ...
-```
+Knowledge often comes out of a specific project, but that doesn't earn it a folder. A project-specific note (a debugging technique for one codebase, a project architecture decision) and a general note (a concept like "React Server Components", a person like "Andrej Karpathy") both live directly in `notes/` with the appropriate `category:`. Distinguish project-scoped knowledge with a tag (e.g. `tags: [my-project]`), not a directory.
 
-**When knowledge is project-specific** (a debugging technique that only applies to one codebase, a project-specific architecture decision), put it under `projects/<project-name>/<category>/`.
+Give each project a single overview note in `notes/`, with `category: entity` and named after the project (`notes/my-project.md`). Use a real project name for the filename — Obsidian's graph view uses the filename as the node label, so a generic name like `project.md` makes every project indistinguishable in the graph.
 
-**When knowledge is general** (a concept like "React Server Components", a person like "Andrej Karpathy", a widely applicable skill), put it in the global category directory.
+**Cross-referencing:** The overview note should `[[wikilink]]` to the concept, reference, and entity notes relevant to that project, and those notes link back. Because the vault is flat and basenames are unique, links are always bare `[[note-name]]`.
 
-**Cross-referencing:** Project pages should `[[wikilink]]` to global pages and vice versa. A project's overview page should link to the key concept, skill, and entity pages relevant to that project — whether they live under the project or globally.
-
-**Naming rule:** The project overview file must be named `<project-name>.md`, not `_project.md`. Obsidian's graph view uses the filename as the node label — `_project.md` makes every project appear as `_project` in the graph, making it unreadable. So `projects/my-project/my-project.md`, `projects/another-project/another-project.md`, etc.
-
-Each project directory has an overview page structured like this:
+A project overview note is structured like this:
 
 ```markdown
 ---
 title: My Project
-category: project
-tags: [ai, web, backend]
-source_path: ~/.claude/projects/-Users-name-Documents-projects-my-project
+category: entity
+tags: [ai, web, backend, my-project]
 created: 2026-03-01T00:00:00Z
 updated: 2026-04-06T00:00:00Z
 ---
@@ -109,19 +87,19 @@ updated: 2026-04-06T00:00:00Z
 One-paragraph summary of what this project is.
 
 ## Key Concepts
-- [[concepts/some-api]] — used for core functionality
-- [[projects/my-project/concepts/main-architecture]] — project-specific architecture
+- [[some-api]] — used for core functionality
+- [[main-architecture]] — the project's architecture
 
 ## Related
-- [[entities/some-service]] — deployment platform
+- [[some-service]] — deployment platform
 ```
 
 ## Special Files
 
-Every wiki has these files at its root:
+Bookkeeping files live under `_system/`, never at the vault root. The one exception is `.manifest.json`, which stays at the vault root.
 
-### `index.md`
-A content-oriented catalog organized by category. Each entry has a one-line summary and tags. Rebuild this after every ingest operation. Format:
+### `_system/index.md`
+A content-oriented catalog grouped by category. Each entry has a one-line summary and tags. The `## Concepts`, `## Entities`, etc. below are heading sections inside this one file — groupings, not folders on disk. Rebuild this after every ingest operation. Format:
 
 ```markdown
 # Wiki Index
@@ -137,7 +115,7 @@ A content-oriented catalog organized by category. Each entry has a one-line summ
 ❌ Don't: `description (#tag)` — breaks tag parsing
 ✅ Do: `description ( #tag)` — proper spacing and tag parsing
 
-### `log.md`
+### `_system/log.md`
 Chronological append-only record tracking every operation. Each entry is parseable:
 
 ```markdown
@@ -166,7 +144,7 @@ When creating a new wiki page, use this structure:
 ```markdown
 ---
 title: Page Title
-category: concepts
+category: concept
 tags: [ml, architecture]
 aliases: [alternate name]
 sources: [papers/attention.pdf]
@@ -197,7 +175,7 @@ Things that are unresolved or need more sources.
 
 ## Sources
 
-- [[references/attention-is-all-you-need]] — Original paper
+- [[attention-is-all-you-need]] — Original paper (a `category: reference` note)
 ```
 
 ## Provenance Markers
@@ -240,7 +218,7 @@ Reading the vault is the dominant cost of every read-side skill. Use the cheapes
 
 | Need | Primitive | Relative cost |
 |---|---|---|
-| Does a page exist? What's its title/category/tags? | Read `index.md`; `Grep` frontmatter blocks (scope with a pattern that targets `^---` blocks at file heads) | **Cheapest** |
+| Does a page exist? What's its title/category/tags? | Read `_system/index.md`; `Grep` frontmatter blocks (scope with a pattern that targets `^---` blocks at file heads) | **Cheapest** |
 | 1–2 sentence preview of a page | Read the `summary:` field in its frontmatter | **Cheap** |
 | A specific claim or section inside a page | `Grep -A <n> -B <n> "<term>" <file>` — returns only the matching lines plus context | **Medium** |
 | Whole-page content | `Read <file>` | **Expensive** — last resort |

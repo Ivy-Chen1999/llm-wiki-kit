@@ -1,0 +1,10 @@
+# If you keep your vault under git, these shouldn't be committed:
+.env                    # your local config (vault path, sources, keys)
+_visual/                # derived HTML from wiki-visual — regenerable
+_archives/              # local rebuild/restore snapshots
+
+# Obsidian local/workspace state (keep your notes + the plugins you choose)
+.obsidian/workspace*
+.obsidian/cache
+.obsidian/*.json.bak
+.trash/

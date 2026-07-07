@@ -11,6 +11,8 @@ description: >
 
 You are running an autonomous research loop on a topic, synthesizing what you find, and filing the results into the Obsidian wiki as permanent knowledge.
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Set `VAULT` to that `OBSIDIAN_VAULT_PATH`.
@@ -26,7 +28,7 @@ Confirm the research topic with the user if it's ambiguous. Then proceed.
 
 ## Research Configuration (optional)
 
-If `references/research-config.md` exists in the vault, read it and apply any rules it defines:
+If `$VAULT/_system/research-config.md` exists, read it and apply any rules it defines:
 - Source preferences (e.g., prefer academic sources, avoid certain domains)
 - Domains to skip
 - Confidence scoring adjustments
@@ -76,17 +78,17 @@ If contradictions are minor or the topic feels well-covered after Round 2, skip 
 
 ## Filing — Write Wiki Pages
 
-Organize all findings into wiki pages across four output areas:
+All notes live flat in `notes/`; a page's type is set by its `category:` frontmatter. Organize your findings into four kinds of page:
 
-### 1. sources/ — One page per major reference
+### 1. Reference pages — one per major source (`category: reference`)
 
-For each significant source (typically 4-8 pages total):
+For each significant source (typically 4-8 pages total), write a `notes/<Source title>.md` with `category: reference`:
 
 ```yaml
 ---
 title: >-
   <Source title>
-category: references
+category: reference
 tags: [<2-4 domain tags>]
 sources:
   - "<URL>"
@@ -104,21 +106,21 @@ provenance:
 
 Body: title, URL, what it covers, key claims (with provenance markers), limitations.
 
-### 2. concepts/ — One page per substantive concept
+### 2. Concept pages — one per substantive concept (`category: concept`)
 
-For each significant concept surfaced across sources:
+For each significant concept surfaced across sources, write a `notes/<Concept>.md` with `category: concept`:
 
-Standard concept frontmatter + body. Link concepts to each other and to source pages.
+Standard concept frontmatter + body. Link concepts to each other and to the reference pages that support them.
 
-### 3. entities/ — Tools, organizations, people
+### 3. Entity pages — tools, organizations, people (`category: entity`)
 
-For each significant entity encountered (tools, libraries, companies, key authors):
+For each significant entity encountered (tools, libraries, companies, key authors), write a `notes/<Entity>.md` with `category: entity`:
 
-Standard entity frontmatter. Link back to concepts that use the entity and sources where it appears.
+Standard entity frontmatter. Link back to concepts that use the entity and the reference pages where it appears.
 
-### 4. synthesis/Research: [Topic].md — Master synthesis
+### 4. Master synthesis — `notes/Research: [Topic].md` (`category: synthesis`)
 
-The primary output: a structured synthesis of everything found.
+The primary output: a structured synthesis of everything found, written to `notes/Research: [Topic].md`.
 
 ```yaml
 ---
@@ -165,7 +167,7 @@ After filing all pages:
 - Every source page should link to the concept pages it informed
 - The synthesis page should link to all concept, entity, and source pages produced
 
-Check `index.md` for existing pages on the same topics — merge into existing pages rather than creating duplicates.
+Check `_system/index.md` for existing pages on the same topics — merge into existing pages rather than creating duplicates.
 
 ## Update Tracking Files
 
@@ -182,21 +184,22 @@ Check `index.md` for existing pages on the same topics — merge into existing p
 }
 ```
 
-**`index.md`** — Add all new pages under their respective sections.
+**`_system/index.md`** — Add all new pages under their respective category sections.
 
-**`log.md`** — Append:
+**`_system/log.md`** — Append:
 ```
 - [TIMESTAMP] WIKI_RESEARCH topic="<topic>" rounds=N sources_fetched=N pages_created=M
 ```
 
-**`hot.md`** — Update **Recent Activity** with the research topic and core finding. Update **Active Threads** if this is ongoing. Update `updated` timestamp.
+**`_system/hot.md`** — Update **Recent Activity** with the research topic and core finding. Update **Active Threads** if this is ongoing. Update `updated` timestamp.
 
 ## Quality Checklist
 
 - [ ] 3 rounds completed (or halted at sufficient depth)
-- [ ] Synthesis page exists at `synthesis/Research: [Topic].md`
-- [ ] Source pages written for major references
-- [ ] Concept and entity pages written for significant items
+- [ ] Synthesis page exists at `notes/Research: [Topic].md` (`category: synthesis`)
+- [ ] Reference pages written for major sources (`category: reference`)
+- [ ] Concept and entity pages written for significant items (`category: concept` / `category: entity`)
 - [ ] Contradictions flagged in synthesis page
 - [ ] All pages cross-linked
-- [ ] `index.md`, `log.md`, `hot.md`, `.manifest.json` updated
+- [ ] Applied the **wiki-sourcing** gate to every falsifiable claim (fetched source + `(as of …)`, else `[unverified]`/hedge)
+- [ ] `_system/index.md`, `_system/log.md`, `_system/hot.md`, `.manifest.json` updated

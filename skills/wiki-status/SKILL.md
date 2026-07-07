@@ -34,8 +34,8 @@ The manifest lives at `$OBSIDIAN_VAULT_PATH/.manifest.json`. It tracks every sou
       "modified_at": "2026-04-05T08:00:00Z",
       "source_type": "document",
       "project": null,
-      "pages_created": ["concepts/transformers.md"],
-      "pages_updated": ["entities/vaswani.md"]
+      "pages_created": ["notes/transformers.md"],
+      "pages_updated": ["notes/vaswani.md"]
     },
     "~/.claude/projects/-Users-name-my-app/abc123.jsonl": {
       "ingested_at": "2026-04-06T11:00:00Z",
@@ -43,14 +43,14 @@ The manifest lives at `$OBSIDIAN_VAULT_PATH/.manifest.json`. It tracks every sou
       "modified_at": "2026-04-06T09:00:00Z",
       "source_type": "claude_conversation",
       "project": "my-app",
-      "pages_created": ["entities/my-app.md"],
-      "pages_updated": ["skills/react-debugging.md"]
+      "pages_created": ["notes/my-app.md"],
+      "pages_updated": ["notes/react-debugging.md"]
     }
   },
   "projects": {
     "my-app": {
       "source_path": "~/.claude/projects/-Users-name-my-app",
-      "vault_path": "projects/my-app",
+      "vault_path": "notes/my-app",
       "last_ingested": "2026-04-06T11:00:00Z",
       "conversations_ingested": 5,
       "conversations_total": 8,
@@ -122,7 +122,7 @@ For Codex history specifically, also compute:
 
 ## Step 3: Report the Status
 
-**Visibility tally (before rendering the report):** Grep frontmatter across all vault `.md` pages for `visibility/internal` and `visibility/pii` tag values. Count:
+**Visibility tally (before rendering the report):** Grep frontmatter across all `.md` pages in `notes/` for `visibility/internal` and `visibility/pii` tag values. Count:
 - `public` = pages with `visibility/public` tag **or** no `visibility/` tag at all
 - `internal` = pages with `visibility/internal` tag
 - `pii` = pages with `visibility/pii` tag
@@ -135,7 +135,7 @@ Present a clear summary:
 # Wiki Status
 
 ## Overview
-- **Total wiki pages:** 87 across 6 categories
+- **Total wiki pages:** 87 across 5 categories
 - **Page visibility:** 72 public · 11 internal · 4 pii
 - **Total sources ingested:** 42
 - **Projects tracked:** 6
@@ -193,11 +193,11 @@ Where the delta report tells the user what's pending, insights mode tells them w
 
 ### What to compute
 
-**First, build the wikilink graph.** Glob all `.md` pages, extract every `[[wikilink]]`, and build:
+**First, build the wikilink graph.** Glob all `.md` pages under `notes/`, extract every `[[wikilink]]`, and build:
 - `incoming[page]` = count of other pages that link to this page
 - `outgoing[page]` = count of pages this page links out to
 - `tags[page]` = set of tags from frontmatter
-- `category[page]` = directory prefix (concepts/, entities/, skills/, etc.)
+- `category[page]` = the frontmatter `category:` value (`concept`, `entity`, `reference`, `insight`, or `synthesis`)
 
 You'll reuse this graph across all sections below.
 
@@ -224,10 +224,10 @@ You'll reuse this graph across all sections below.
    - Show top 5 tags by cohesion (strongest clusters) and bottom 5 (most fragmented)
 
 4. **Surprising connections.** Cross-category wikilinks that are non-obvious — scored by how unexpected they are:
-   - Score each wikilink that crosses category boundaries (e.g., `concepts/` → `entities/`, `skills/` → `synthesis/`):
+   - Score each wikilink that crosses category boundaries (e.g., a `concept` page → an `entity` page, or an `insight` page → a `synthesis` page):
      - **+3** if the linking page or claim is marked `^[ambiguous]` (uncertain connection, worth reviewing)
      - **+2** if the linking page is marked `^[inferred]` (synthesized, not directly stated)
-     - **+2** if the categories are in different knowledge layers (e.g., `concepts` ↔ `entities` more surprising than `concepts` ↔ `concepts`)
+     - **+2** if the categories are in different knowledge layers (e.g., `concept` ↔ `entity` more surprising than `concept` ↔ `concept`)
      - **+2** if source page has ≤ 2 total links (peripheral) but target has ≥ 8 (hub) — unexpected reach from edge to center
    - Show top 5 scored connections with a plain-language reason for each
 
@@ -235,8 +235,8 @@ You'll reuse this graph across all sections below.
 
 6. **Rough clusters.** Group anchor pages by dominant tag. (Simple tag intersection — just for orientation.)
 
-7. **Graph delta since last run.** Compare the current link graph to the snapshot stored in the previous `_insights.md`:
-   - Read the `<!-- GRAPH_SNAPSHOT: ... -->` line at the bottom of the previous `_insights.md` (if it exists) — it contains a compact JSON edge list
+7. **Graph delta since last run.** Compare the current link graph to the snapshot stored in the previous `_system/_insights.md`:
+   - Read the `<!-- GRAPH_SNAPSHOT: ... -->` line at the bottom of the previous `_system/_insights.md` (if it exists) — it contains a compact JSON edge list
    - Compute: new pages added, pages removed, new wikilinks created, wikilinks removed
    - Flag: pages that were isolated last run but now have incoming links ("newly connected: X, Y")
    - Flag: pages that lost incoming links since last run ("link target may have been renamed: A, B")
@@ -253,7 +253,7 @@ You'll reuse this graph across all sections below.
 
 ### Output
 
-Write the result to `_insights.md` at the vault root. Overwrite freely — it's regenerable. At the very end, embed a compact graph snapshot as an HTML comment so the next run can diff against it.
+Write the result to `_system/_insights.md`. Overwrite freely — it's regenerable. At the very end, embed a compact graph snapshot as an HTML comment so the next run can diff against it.
 
 ```markdown
 # Wiki Insights — <TIMESTAMP>
@@ -261,13 +261,13 @@ Write the result to `_insights.md` at the vault root. Overwrite freely — it's 
 ## Anchor Pages (top 10 hubs)
 | Page | Incoming | Outgoing | Note |
 |---|---|---|---|
-| [[concepts/transformer-architecture]] | 23 | 8 | connector hub |
-| [[entities/andrej-karpathy]] | 17 | 0 | sink hub — cross-linker candidate |
+| [[transformer-architecture]] | 23 | 8 | connector hub |
+| [[andrej-karpathy]] | 17 | 0 | sink hub — cross-linker candidate |
 
 ## Bridge Pages (top 5)
 | Page | Bridges | Cross-cluster pairs |
 |---|---|---|
-| [[concepts/exponential-growth]] | #ml ↔ #economics | 4 pairs |
+| [[exponential-growth]] | #ml ↔ #economics | 4 pairs |
 
 ## Tag Cluster Cohesion
 ### Most cohesive (well-linked)
@@ -276,12 +276,12 @@ Write the result to `_insights.md` at the vault root. Overwrite freely — it's 
 - **#systems** — 7 pages, cohesion 0.06 ⚠️ run cross-linker on this tag
 
 ## Surprising Connections (top 5)
-- [[concepts/scaling-laws]] → [[entities/gordon-moore]] — score 5
-  - Reason: cross-layer (concepts ↔ entities), marked ^[inferred]
+- [[scaling-laws]] → [[gordon-moore]] — score 5
+  - Reason: cross-layer (concept ↔ entity), marked ^[inferred]
 - ...
 
 ## Orphan-Adjacent (dead-ends near hubs)
-- [[concepts/foo]] — linked from 3 hubs, 0 outbound links
+- [[foo]] — linked from 3 hubs, 0 outbound links
 
 ## Rough Clusters
 - **#ml** — transformer-architecture, attention-mechanism, scaling-laws
@@ -289,19 +289,19 @@ Write the result to `_insights.md` at the vault root. Overwrite freely — it's 
 
 ## Graph Delta Since Last Run
 - +3 new pages, +11 new wikilinks
-- Newly connected: [[concepts/bar]], [[entities/baz]]
-- Lost incoming links: [[references/old-paper]] (target may have been renamed)
+- Newly connected: [[bar]], [[baz]]
+- Lost incoming links: [[old-paper]] (target may have been renamed)
 
 ## Questions Worth Asking
 1. Resolve: What is the exact relationship between `scaling-laws` and `moore's-law`? (^[ambiguous] claim)
 2. Explore: Why does `exponential-growth` bridge #ml and #economics?
-3. Link: `references/foo.md` has no incoming links — what should reference it?
+3. Link: `notes/foo.md` has no incoming links — what should reference it?
 4. Audit: Should tag `#systems` be split? (cohesion 0.06, 7 pages)
 
-<!-- GRAPH_SNAPSHOT: {"nodes":["concepts/foo","entities/bar"],"edges":[["concepts/foo","entities/bar"]]} -->
+<!-- GRAPH_SNAPSHOT: {"nodes":["foo","bar"],"edges":[["foo","bar"]]} -->
 ```
 
-After writing the file, append to `log.md`:
+After writing the file, append to `_system/log.md`:
 ```
 - [TIMESTAMP] STATUS_INSIGHTS anchors=10 bridges=N cohesion_checked=T surprising=5 questions=7 delta="+N pages +M links"
 ```
@@ -314,6 +314,6 @@ After writing the file, append to `log.md`:
 ## Notes
 
 - If the manifest doesn't exist, report everything as "new" and recommend a full ingest
-- This skill only reads and reports — it doesn't modify anything (except writing `_insights.md` in insights mode, which is regenerable)
+- This skill only reads and reports — it doesn't modify anything (except writing `_system/_insights.md` in insights mode, which is regenerable)
 - The actual ingest work is done by the ingest skills (`wiki-ingest`, `claude-history-ingest`, `codex-history-ingest`, `data-ingest`)
 - Those skills are responsible for updating the manifest after they finish

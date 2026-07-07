@@ -7,13 +7,13 @@ These are the mental frameworks to use when distilling a source into wiki pages.
 When reading a source document, ask yourself:
 
 1. **What are the 3-5 most important ideas in this document?**
-   These become concepts pages or updates to existing concept pages.
+   These become new concept pages (`category: concept`) or updates to existing ones.
 
 2. **Who or what is mentioned that deserves its own page?**
-   People, tools, organizations, projects → entity pages.
+   People, tools, organizations, projects → entity pages (`category: entity`).
 
 3. **What does this document teach you how to do?**
-   Procedures, workflows, techniques → skills pages.
+   Procedures, workflows, techniques → concept pages that capture the how-to (`category: concept`).
 
 4. **What claims does this document make?**
    Each claim needs a source attribution. If it contradicts an existing wiki claim, note the contradiction.

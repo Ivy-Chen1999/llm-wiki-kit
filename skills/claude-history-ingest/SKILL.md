@@ -14,11 +14,13 @@ You are extracting knowledge from the user's past Claude Code conversations and 
 
 This skill can be invoked directly or via the `wiki-history-ingest` router (`/wiki-history-ingest claude`).
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Also read `CLAUDE_HISTORY_PATH` (defaults to `~/.claude`).
 2. Read `.manifest.json` at the vault root to check what's already been ingested
-3. Read `index.md` at the vault root to know what the wiki already contains
+3. Read `_system/index.md` to know what the wiki already contains
 
 ## Ingest Modes
 
@@ -157,10 +159,10 @@ Memory content here.
 For each memory file:
 
 - Read it and parse the frontmatter
-- `user` type → feeds into an entity page about the user, or concept pages about their domain
-- `feedback` type → feeds into skills pages (workflow patterns, what works, what doesn't)
-- `project` type → feeds into entity pages for the project
-- `reference` type → feeds into reference pages pointing to external resources
+- `user` type → feeds into an entity note about the user (`category: entity`), or concept notes about their domain
+- `feedback` type → feeds into concept notes capturing workflow patterns (`category: concept`) — what works, what doesn't
+- `project` type → feeds into the project's entity note (`category: entity`)
+- `reference` type → feeds into reference notes (`category: reference`) pointing to external resources
 
 The `MEMORY.md` index file in each project is a quick summary — read it first to decide which individual memory files are worth reading in full.
 
@@ -226,7 +228,7 @@ For each `audit.jsonl` found under `local-agent-mode-sessions/`, read it line by
 **What to extract from audit logs:**
 
 - **File access patterns** — which files does the agent repeatedly Read or Edit? These are the high-value files in the project. Note them as project references.
-- **Shell commands** — recurring Bash commands reveal the project's build/test/deploy workflow. Distill these into a `skills/` page (e.g. "how this project is built and tested").
+- **Shell commands** — recurring Bash commands reveal the project's build/test/deploy workflow. Distill these into a concept note (`category: concept`, e.g. "how this project is built and tested").
 - **Tool call sequences** — if the agent always does Read → Edit → Bash in a particular order, that's a workflow pattern worth capturing.
 - **Error patterns** — failed tool calls (non-zero exit codes, error outputs) reveal pain points, known rough edges, or recurring bugs.
 - **MCP tool calls** — calls to MCP tools reveal which external services and APIs the project integrates with.
@@ -252,7 +254,7 @@ Don't create one wiki page per conversation. Instead:
 
 ## Step 5: Distill into Wiki Pages
 
-Each Claude project maps to a project directory in the vault. The project directory name from `~/.claude/projects/` encodes the original path — decode it to get a clean project name:
+Every note lands flat in `notes/`; its type is set by the YAML `category:` field (`concept | entity | reference | insight | synthesis`), never by a folder. The project directory name from `~/.claude/projects/` encodes the original path — decode it to get a clean project name:
 
 ```
 -Users/Documents/projects/my-Project   → myproject
@@ -261,16 +263,18 @@ Each Claude project maps to a project directory in the vault. The project direct
 
 ### Project-specific vs. global knowledge
 
-| What you found                     | Where it goes               | Example                                             |
-| ---------------------------------- | --------------------------- | --------------------------------------------------- |
-| Project architecture decisions     | `projects/<name>/concepts/` | `projects/my-project/concepts/main-architecture.md` |
-| Project-specific debugging         | `projects/<name>/skills/`   | `projects/my-project/skills/api-rate-limiting.md`   |
-| General concept the user learned   | `concepts/` (global)        | `concepts/react-server-components.md`               |
-| Recurring problem across projects  | `skills/` (global)          | `skills/debugging-hydration-errors.md`              |
-| A tool/service used                | `entities/` (global)        | `entities/vercel-functions.md`                      |
-| Patterns across many conversations | `synthesis/` (global)       | `synthesis/common-debugging-patterns.md`            |
+There are no per-project folders. Project-specific knowledge and global knowledge both live in `notes/`; tie a note to its project by linking to the project's entity note and by prefixing the filename with the project name so basenames stay unique.
 
-For each project with content, create or update the project overview page at `projects/<name>/<name>.md` — **named after the project, not `_project.md`**. Obsidian's graph view uses the filename as the node label, so `_project.md` makes every project show up as `_project` in the graph. Naming it `<name>.md` gives each project a distinct, readable node name.
+| What you found                     | category    | Example note in `notes/`                |
+| ---------------------------------- | ----------- | --------------------------------------- |
+| Project architecture decisions     | `concept`   | `notes/my-project-architecture.md`      |
+| Project-specific debugging         | `concept`   | `notes/my-project-api-rate-limiting.md` |
+| General concept the user learned   | `concept`   | `notes/react-server-components.md`      |
+| Recurring problem across projects  | `concept`   | `notes/debugging-hydration-errors.md`   |
+| A tool/service used                | `entity`    | `notes/vercel-functions.md`             |
+| Patterns across many conversations | `synthesis` | `notes/common-debugging-patterns.md`    |
+
+For each project with content, create or update a project overview note at `notes/<name>.md` with `category: entity`, named after the project. Obsidian's graph view uses the filename as the node label, so a descriptive `<name>.md` gives each project a distinct, readable node — avoid generic names like `project.md` that would collapse every project into one indistinct node.
 
 **Important:** Distill the _knowledge_, not the conversation. Don't write "In a conversation on March 15, the user asked about X." Write the knowledge itself, with the conversation as a source attribution.
 
@@ -300,7 +304,7 @@ Also update the `projects` section of the manifest:
 {
   "project-name": {
     "source_path": "~/.claude/projects/-Users-...",
-    "vault_path": "projects/project-name",
+    "vault_path": "notes/project-name.md",
     "last_ingested": "TIMESTAMP",
     "conversations_ingested": 5,
     "conversations_total": 8,
@@ -313,13 +317,13 @@ Also update the `projects` section of the manifest:
 
 ### Create journal entry + update special files
 
-Update `index.md` and `log.md` per the standard process:
+Update `_system/index.md` and `_system/log.md` per the standard process:
 
 ```
 - [TIMESTAMP] CLAUDE_HISTORY_INGEST projects=N conversations=M desktop_sessions=D audit_logs=A pages_updated=X pages_created=Y mode=append|full
 ```
 
-**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary — e.g. "Ingested 5 Claude conversations across 2 projects; surfaced patterns in API design and testing strategy." Keep the last 3 operations. Update **Active Threads** if any ongoing project is now better understood. Update `updated` timestamp.
+**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary — e.g. "Ingested 5 Claude conversations across 2 projects; surfaced patterns in API design and testing strategy." Keep the last 3 operations. Update **Active Threads** if any ongoing project is now better understood. Update `updated` timestamp.
 
 ## Privacy
 

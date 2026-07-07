@@ -14,11 +14,13 @@ You are extracting knowledge from the user's past Codex sessions and distilling 
 
 This skill can be invoked directly or via the `wiki-history-ingest` router (`/wiki-history-ingest codex`).
 
+> **Source discipline (required):** before writing any claim, apply the **`wiki-sourcing`** gate — a falsifiable fact (number / date / price / version / benchmark / named attribution) needs a *fetched* source + an `(as of YYYY-MM, src)` marker; otherwise hedge or mark it `[unverified]`. A digest or search snippet is **not** a source — trace it to the primary. See the `wiki-sourcing` skill for the full doctrine (three states, degradation ≠ refutation, don't cave to pushback).
+
 ## Before You Start
 
 1. Resolve the vault path (precedence, highest first): the `OBSIDIAN_VAULT_PATH` environment variable if set, else a `.env` in the current working directory (vault-scoped), else `~/.obsidian-wiki/config` (global default). Also read `CODEX_HISTORY_PATH` (defaults to `~/.codex`).
 2. Read `.manifest.json` at the vault root to check what has already been ingested
-3. Read `index.md` at the vault root to understand what the wiki already contains
+3. Read `_system/index.md` to understand what the wiki already contains
 
 ## Ingest Modes
 
@@ -135,15 +137,15 @@ Do not create one wiki page per session.
 
 ## Step 5: Distill into Wiki Pages
 
-Route extracted knowledge using existing wiki conventions:
+All extracted knowledge becomes flat notes in `notes/`; a note's type is set by its `category:` frontmatter, not by a folder. Pick the category that fits the knowledge:
 
-- Project-specific architecture/process -> `projects/<name>/...`
-- General concepts -> `concepts/`
-- Recurring techniques/debug playbooks -> `skills/`
-- Tools/services -> `entities/`
-- Cross-session patterns -> `synthesis/`
+- General concepts, recurring techniques, and debug playbooks -> `category: concept`
+- Tools and services -> `category: entity`
+- Cross-session patterns that connect multiple topics -> `category: synthesis`
+- A summarized external source -> `category: reference`
+- The user's own opinion or takeaway -> `category: insight`
 
-For each impacted project, create/update `projects/<name>/<name>.md` (project name as filename, never `_project.md`).
+For project-specific architecture or process, write a single flat note per project in `notes/`, using the project name as the filename (e.g. `notes/<project-name>.md`, never `_project.md`) and the category that best fits its content.
 
 ### Writing rules
 
@@ -183,13 +185,13 @@ Add/update a top-level project/session summary block:
 
 ### Update special files
 
-Update `index.md` and `log.md`:
+Update `_system/index.md` and `_system/log.md`:
 
 ```
 - [TIMESTAMP] CODEX_HISTORY_INGEST sessions=N pages_updated=X pages_created=Y mode=append|full
 ```
 
-**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary — e.g. "Ingested 12 Codex sessions; surfaced recurring patterns in CLI tooling and shell scripting." Keep the last 3 operations. Update `updated` timestamp.
+**`hot.md`** — Read `$OBSIDIAN_VAULT_PATH/_system/hot.md` (create from the template in `wiki-ingest` if missing). Update **Recent Activity** with a one-line summary — e.g. "Ingested 12 Codex sessions; surfaced recurring patterns in CLI tooling and shell scripting." Keep the last 3 operations. Update `updated` timestamp.
 
 ## Privacy and Compliance
 
