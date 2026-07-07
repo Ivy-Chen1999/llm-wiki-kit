@@ -9,6 +9,10 @@
 #
 # Just run:  ./install.sh
 # Advanced:  ./install.sh --skills-dir ~/.agents/skills   (for non-Claude agents)
+#           ./install.sh --copy                          (copy skills instead of symlinking)
+#
+# Requires bash. On Windows use WSL or Git Bash. It never modifies existing skills,
+# settings.json, CLAUDE.md, or plugins — it only adds new skills and writes ~/.obsidian-wiki/config.
 #
 set -euo pipefail
 
@@ -19,11 +23,13 @@ CONFIG_FILE="$CONFIG_DIR/config"
 # Claude (Claude Code and the Claudian Obsidian plugin) reads user skills from
 # ~/.claude/skills. Override with --skills-dir for other agents.
 SKILLS_DIR="$HOME/.claude/skills"
+COPY=0   # 0 = symlink (default), 1 = copy skills (survives moving/deleting this repo)
 
-# --- parse optional flag ---
+# --- parse optional flags ---
 while [ $# -gt 0 ]; do
   case "$1" in
     --skills-dir) SKILLS_DIR="$2"; shift 2 ;;
+    --copy) COPY=1; shift ;;
     -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
@@ -49,15 +55,21 @@ command -v git >/dev/null 2>&1 || warn "git not found — you'll need it to upda
 # already there (your existing skills, settings.json, CLAUDE.md, plugins are left
 # completely alone). A name that already exists is skipped and reported, so a
 # same-named skill of yours always wins.
-say "Step 1/4 — linking skills into $SKILLS_DIR"
+verb=$([ "$COPY" = 1 ] && echo "copying" || echo "linking")
+say "Step 1/4 — $verb skills into $SKILLS_DIR"
 mkdir -p "$SKILLS_DIR"
-linked=0; skipped_names=""
+added=0; skipped_names=""
 for dir in "$SKILLS_SRC"/*/; do
   name="$(basename "$dir")"; dest="$SKILLS_DIR/$name"
   if [ -e "$dest" ] || [ -L "$dest" ]; then skipped_names="$skipped_names $name"; continue; fi
-  ln -s "$dir" "$dest"; linked=$((linked+1))
+  if [ "$COPY" = 1 ]; then cp -R "$dir" "$dest"; else ln -s "$dir" "$dest"; fi
+  added=$((added+1))
 done
-ok "$linked skills linked (as symlinks — keep this repo where it is; deleting it breaks them)"
+if [ "$COPY" = 1 ]; then
+  ok "$added skills copied (self-contained; re-run after 'git pull' to update them)"
+else
+  ok "$added skills linked (symlinks — keep this repo where it is; deleting it breaks them, or use --copy)"
+fi
 if [ -n "$skipped_names" ]; then
   warn "left these untouched (a skill with the same name already exists):$skipped_names"
   warn "if you want the kit's version, remove yours from $SKILLS_DIR and re-run — otherwise ignore this."

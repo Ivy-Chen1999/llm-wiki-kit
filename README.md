@@ -18,8 +18,10 @@ There are three layers:
 llm-wiki-kit/
 ├── skills/          22 agent skills
 ├── vault-template/  an empty vault you can copy and start using
+├── evals/           behavioral evals for the skills (+ LangSmith adapter)
+├── scripts/         repo-hygiene checks (run in CI)
 ├── .env.example     config (vault path, sources, search)
-├── install.sh       links the skills into your agent's skills directory
+├── install.sh       links (or --copy) the skills into your agent's skills directory
 ├── setup-qmd.sh     optional: installs and indexes local search
 └── LICENSE
 ```
@@ -73,6 +75,10 @@ Notes:
 - The installer links skills into `~/.claude/skills`, which Claude (Claude Code and the Claudian Obsidian plugin) reads automatically. For another agent: `./install.sh --skills-dir <that agent's skills dir>`.
 - It offers to install local search (`qmd`) at the end. Saying no is fine — the skills fall back to `Grep`. You can run `./setup-qmd.sh` later instead.
 - Re-running is safe: existing skills, vault, and config are left untouched.
+- Skills are **symlinked** by default (so `git pull` updates them live). Pass `--copy` to copy them
+  instead — handy if you plan to move or delete this clone.
+- **Windows:** run the installer under WSL or Git Bash (it's a bash script). The skills themselves
+  are plain markdown and work with any agent.
 
 ### Working with more than one vault
 
@@ -134,6 +140,15 @@ The 22 skills above are the shared core. The skills that pay off most are usuall
 - your own **ingest house-style**, or a **dispatcher** that routes "/wiki do X".
 
 [`personal-skills/`](personal-skills/) has a blank template and two worked examples (retro, digest) to copy and adapt. Personal skills live in `~/.claude/skills/`, not in this repo — so updating the shared core (`git pull`) never touches them.
+
+## Development
+
+- `bash scripts/check.sh` — deterministic hygiene gate (frontmatter, no personal info, flat-model
+  invariants, README/skills parity). Runs in CI on every push/PR.
+- `evals/` — behavioral evals: give a cold agent a task + the skills, then assert on the files it
+  produces. `evals/run_all.sh 3` runs every case ×3 and reports a pass-rate. See
+  [`evals/README.md`](evals/README.md) (includes a LangSmith adapter).
+- Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits
 
