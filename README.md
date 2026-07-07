@@ -1,5 +1,8 @@
 # llm-wiki-kit
 
+[![ci](https://github.com/Ivy-Chen1999/llm-wiki-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Ivy-Chen1999/llm-wiki-kit/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A set of agent skills and a starter Obsidian vault for keeping a personal wiki that an LLM helps maintain. Based on [Andrej Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
 The idea: instead of searching raw documents every time you have a question (RAG), the agent processes a source once and writes it into structured, linked Obsidian notes. Questions are then answered from those notes. You pick the sources and ask the questions; the agent does the summarizing, linking, and filing.
